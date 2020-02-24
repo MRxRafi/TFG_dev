@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-//using Stateless;
 
 public abstract class BehaviourEngine {
 
@@ -10,7 +9,7 @@ public abstract class BehaviourEngine {
     public const bool IsASubmachine = true;
     public const bool IsNotASubmachine = false;
 
-    public StateMachine<State, Perception> BehaviourMachine { get; set; } //STATELESS
+    //public StateMachine<State, Perception> BehaviourMachine { get; set; } //STATELESS
     public bool Active { get; set; }
     public LeafNode NodeToReturn { get; set; }
     public bool IsSubMachine { get; set; }
@@ -18,6 +17,8 @@ public abstract class BehaviourEngine {
     protected Dictionary<string, Transition> transitions;
     protected Dictionary<string, State> states;
     protected State entryState;
+
+    /* TODO actualState */
 
     #endregion variables
 
@@ -184,6 +185,8 @@ public abstract class BehaviourEngine {
 
     #endregion create exit transitions
 
+    #region other methods
+
     /// <summary>
     /// Fires the transition
     /// </summary>
@@ -244,4 +247,8 @@ public abstract class BehaviourEngine {
     {
         return;
     }
+
+    /* TODO Configure(state) */
+
+    #endregion other methods
 }
