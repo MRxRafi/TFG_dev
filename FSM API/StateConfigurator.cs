@@ -2,14 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class StateConfigurator{
+public class StateConfigurator {
     #region variables
 
-    private enum STATE_TYPE {EMPTY, WITHOUT_PERCEPTION, WITH_PERCEPTION, SUBMACHINE};
+    private enum STATE_TYPE {EMPTY, WITHOUT_PERCEPTION, WITH_PERCEPTION, SUBMACHINE}; // Maybe this isn't necessary
     private STATE_TYPE stateType; // Maybe this isn't necessary
     private Action exit, entry;
 
+    public Action entry { get; }
+    public Action exit { get; }
+
     #endregion variables
+
+    // ¿No constructors?
 
     #region methods
     public StateConfigurator OnEntry(Action method){

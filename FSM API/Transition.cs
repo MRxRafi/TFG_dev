@@ -31,12 +31,12 @@ public class Transition {
         this.BehaviourEngine = behaviourEngine;
 
         if(StateFrom == StateTo) {
-            BehaviourEngine.BehaviourMachine.Configure(StateFrom)
+            BehaviourEngine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .PermitReentry(Perception);
         }
         else {
-            BehaviourEngine.BehaviourMachine.Configure(StateFrom)
+            BehaviourEngine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .Permit(Perception, StateTo);
         }
@@ -61,14 +61,14 @@ public class Transition {
         if(stateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             this.BehaviourEngine = superMachine;
             Perception.SetBehaviourMachine(superMachine);
-            superMachine.BehaviourMachine.Configure(StateFrom)
+            superMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, StateTo, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
         }
         else { // Exits from the sub-machine
             this.BehaviourEngine = subMachine;
             Perception.SetBehaviourMachine(subMachine);
-            subMachine.BehaviourMachine.Configure(StateFrom)
+            subMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, StateTo, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
         }
@@ -86,7 +86,7 @@ public class Transition {
     {
         if(stateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             // Transitions from Submachine.CurrentState -> Submachine.EntryState
-            Transition returnTransition = new Transition("reset_submachine", subMachine.BehaviourMachine.State, new PushPerception(subMachine), entrySubMachineState, subMachine);
+            Transition returnTransition = new Transition("reset_submachine", subMachine.actualState, new PushPerception(subMachine), entrySubMachineState, subMachine);
             returnTransition.FireTransition();
 
             subMachine.Reset();
@@ -107,7 +107,7 @@ public class Transition {
             superMachine.Active = true;
 
             // Transitions from Supermachine.CurrentState -> stateTo
-            Transition superTransition = new Transition("to_state", superMachine.BehaviourMachine.State, new PushPerception(superMachine), stateTo, superMachine);
+            Transition superTransition = new Transition("to_state", superMachine.actualState, new PushPerception(superMachine), stateTo, superMachine);
             superTransition.FireTransition();
         }
     }
@@ -131,14 +131,14 @@ public class Transition {
         if(StateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             this.BehaviourEngine = superMachine;
             Perception.SetBehaviourMachine(superMachine);
-            superMachine.BehaviourMachine.Configure(StateFrom)
+            superMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, stateTo, returnValue, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
         }
         else { // Exits from the sub-machine
             this.BehaviourEngine = subMachine;
             Perception.SetBehaviourMachine(subMachine);
-            subMachine.BehaviourMachine.Configure(StateFrom)
+            subMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, stateTo, returnValue, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
         }
@@ -164,14 +164,14 @@ public class Transition {
         if(StateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             this.BehaviourEngine = superMachine;
             Perception.SetBehaviourMachine(superMachine);
-            superMachine.BehaviourMachine.Configure(StateFrom)
+            superMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, stateTo, subMachine.GetRootNode().ReturnValue, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
         }
         else { // Exits from the sub-machine
             this.BehaviourEngine = subMachine;
             Perception.SetBehaviourMachine(subMachine);
-            subMachine.BehaviourMachine.Configure(StateFrom)
+            subMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, stateTo, subMachine.GetRootNode().ReturnValue, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
         }
@@ -189,7 +189,7 @@ public class Transition {
     {
         if(stateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             // Transitions from Submachine.CurrentState -> Submachine.EntryState
-            Transition returnTransition = new Transition("reset_submachine", subMachine.BehaviourMachine.State, new PushPerception(subMachine), entrySubMachineState, subMachine);
+            Transition returnTransition = new Transition("reset_submachine", subMachine.actualState, new PushPerception(subMachine), entrySubMachineState, subMachine);
             returnTransition.FireTransition();
 
             subMachine.Reset();
@@ -212,7 +212,7 @@ public class Transition {
             stateTo.ReturnValue = returnValue;
 
             // Transitions from Supermachine.CurrentState -> stateTo
-            Transition superTransition = new Transition("to_state", superMachine.BehaviourMachine.State, new PushPerception(superMachine), stateTo.StateNode, superMachine);
+            Transition superTransition = new Transition("to_state", superMachine.actualState, new PushPerception(superMachine), stateTo.StateNode, superMachine);
             superTransition.FireTransition();
         }
     }
@@ -224,9 +224,15 @@ public class Transition {
     public bool FireTransition()
     {
         //  The current state is equals to the StateFrom     The state from the stateFrom's machine (the super machine) is equals to the stateFrom
-        if(BehaviourEngine.BehaviourMachine.State == StateFrom || StateFrom.BehaviourEngine.BehaviourMachine.State == StateFrom) { //STATELESS
+        if(BehaviourEngine.actualState == StateFrom || StateFrom.BehaviourEngine.actualState == StateFrom) { //STATELESS
             Debug.Log("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
-            Perception.Fire();
+            //Perception.Fire(); // CHANGE
+            
+            /* EXPERIMENTAL */
+            /* Some configurator parameters could be missing here between Exit and Entry */
+            StateFrom.Exit();
+            BehaviourEngine.actualState = StateTo;
+            StateTo.Entry();
 
             return true;
         }

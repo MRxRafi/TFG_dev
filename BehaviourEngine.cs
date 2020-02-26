@@ -18,7 +18,7 @@ public abstract class BehaviourEngine {
     protected Dictionary<string, State> states;
     protected State entryState;
 
-    /* TODO actualState */
+    protected State actualState { get; set; }
 
     #endregion variables
 
@@ -238,7 +238,7 @@ public abstract class BehaviourEngine {
     /// Gets the current state the machine is in
     /// </summary>
     /// <returns></returns>
-    public State GetCurrentState()
+    public State GetCurrentState() // ¿QUITAR?
     {
         return BehaviourMachine.State;
     }
@@ -248,7 +248,9 @@ public abstract class BehaviourEngine {
         return;
     }
 
-    /* TODO Configure(state) */
+    public StateConfigurator Configure(State st){
+        return st.configurator;
+    }
 
     #endregion other methods
 }

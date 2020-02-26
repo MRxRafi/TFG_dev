@@ -10,6 +10,8 @@ public class State {
     public Perception StatePerception { get; }
     public BehaviourEngine BehaviourEngine { get; }
 
+    public StateConfigurator configurator;
+
     private Action StateActionVoid;
     private Action<Perception> StateActionPerception;
 
@@ -40,7 +42,7 @@ public class State {
         this.StateActionVoid = method;
         this.BehaviourEngine = behaviourEngine;
 
-        BehaviourEngine.BehaviourMachine.Configure(this)
+        BehaviourEngine.Configure(this)
             .OnEntry(() => method());
     }
 
@@ -57,7 +59,7 @@ public class State {
         this.StatePerception = (Perception)method.Method.GetParameters().GetValue(0);
         this.BehaviourEngine = behaviourEngine;
 
-        BehaviourEngine.BehaviourMachine.Configure(this)
+        BehaviourEngine.Configure(this)
             .OnEntry(() => method((Perception)method.Method.GetParameters().GetValue(0)));
     }
 
@@ -73,7 +75,7 @@ public class State {
         this.Name = stateName;
         this.BehaviourEngine = behaviourEngine;
 
-        BehaviourEngine.BehaviourMachine.Configure(this)
+        BehaviourEngine.Configure(this)
             .OnEntry(() => EntrySubmachine(entrySubMachineState, stateTo, subMachine, behaviourEngine));
     }
 
@@ -81,13 +83,21 @@ public class State {
 
     private void EntrySubmachine(State entrySubmachineState, State stateTo, BehaviourEngine subMachine, BehaviourEngine behaviourEngine)
     {
-        if(subMachine.BehaviourMachine.State != subMachine.GetState("Entry_Machine"))
+        if(subMachine.actualState != subMachine.GetState("Entry_Machine"))
             return;
 
-        new Transition("Entry_submachine state", subMachine.BehaviourMachine.State, new PushPerception(subMachine), stateTo, subMachine)
+        new Transition("Entry_submachine state", subMachine.actualState, new PushPerception(subMachine), stateTo, subMachine)
             .FireTransition();
 
         behaviourEngine.Active = false;
         subMachine.Active = true;
+    }
+
+    private void Entry(){
+        configurator.entry();
+    }
+
+    private void Exit() {
+        configurator.exit();
     }
 }

@@ -19,6 +19,7 @@ public abstract class Perception {
         return;
     }
 
+/*
     /// <summary>
     /// Fires the perception so the transition happens
     /// </summary>
@@ -26,7 +27,7 @@ public abstract class Perception {
     {
         behaviourEngine.BehaviourMachine.Fire(this); //STATELESS
     }
-
+*/
     public void SetBehaviourMachine(BehaviourEngine behaviourEngine)
     {
         this.behaviourEngine = behaviourEngine;
