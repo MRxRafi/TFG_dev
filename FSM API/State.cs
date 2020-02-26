@@ -28,6 +28,7 @@ public class State {
     {
         this.Name = stateName;
         this.BehaviourEngine = behaviourEngine;
+        this.configurator = new StateConfigurator(STATE_TYPE.EMPTY);
     }
 
     /// <summary>
@@ -41,6 +42,7 @@ public class State {
         this.Name = stateName;
         this.StateActionVoid = method;
         this.BehaviourEngine = behaviourEngine;
+        this.configurator = new StateConfigurator(STATE_TYPE.NOT_EMPTY);
 
         BehaviourEngine.Configure(this)
             .OnEntry(() => method());
@@ -58,6 +60,7 @@ public class State {
         this.StateActionPerception = method;
         this.StatePerception = (Perception)method.Method.GetParameters().GetValue(0);
         this.BehaviourEngine = behaviourEngine;
+        this.configurator = new StateConfigurator(STATE_TYPE.NOT_EMPTY);
 
         BehaviourEngine.Configure(this)
             .OnEntry(() => method((Perception)method.Method.GetParameters().GetValue(0)));
@@ -74,6 +77,7 @@ public class State {
     {
         this.Name = stateName;
         this.BehaviourEngine = behaviourEngine;
+        this.configurator = new StateConfigurator(STATE_TYPE.NOT_EMPTY);
 
         BehaviourEngine.Configure(this)
             .OnEntry(() => EntrySubmachine(entrySubMachineState, stateTo, subMachine, behaviourEngine));
@@ -94,10 +98,15 @@ public class State {
     }
 
     private void Entry(){
-        configurator.entry();
+        if(this.configurator.stateType != STATE_TYPE.EMPTY){
+            configurator.entry();
+        }
     }
 
     private void Exit() {
-        configurator.exit();
+        while(configurator.exit.Count != 0){
+            Action toExecute = configurator.exit.Dequeue();
+            toExecute();
+        }
     }
 }

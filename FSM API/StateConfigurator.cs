@@ -5,40 +5,37 @@ using System.Collections.Generic;
 public class StateConfigurator {
     #region variables
 
-    private enum STATE_TYPE {EMPTY, WITHOUT_PERCEPTION, WITH_PERCEPTION, SUBMACHINE}; // Maybe this isn't necessary
-    private STATE_TYPE stateType; // Maybe this isn't necessary
-    private Action exit, entry;
-
+    public enum STATE_TYPE {EMPTY, NOT_EMPTY};
+    public STATE_TYPE stateType { get; set; } // Maybe this isn't necessary
     public Action entry { get; }
-    public Action exit { get; }
+
+    // A Queue is needed as there could be multiple Actions to execute when we exit 
+    // (the normal Exit + the InternalTransition)
+    public Queue<Action> exit;
 
     #endregion variables
 
     // ¿No constructors?
+    public StateConfigurator(STATE_TYPE st){
+        this.stateType = st;
+        exit = new Queue<Action>();
+    }
 
     #region methods
     public StateConfigurator OnEntry(Action method){
         entry = method;
+        this.stateType = this.STATE_TYPE.NOT_EMPTY;
         return this;
     }
 
     public StateConfigurator OnExit(Action method){
-        exit = method;
-        return this;
-    }
-
-    public StateConfigurator PermitReentry(Perception perception){
-        /* TODO Transition to the same State */
-        return this;
-    }
-
-    public StateConfigurator Permit(Perception perception, State state){
-        /* TODO Transition to State of the same machine */
+        exit.Enqueue(method);
         return this;
     }
 
     public StateConfigurator InternalTransition(Perception perception, Action method){
-        /* TODO Transition to State of other machine */
+        exit.Enqueue(method);
+        return this;
     }
     #endregion methods
 }

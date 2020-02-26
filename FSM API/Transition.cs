@@ -226,12 +226,14 @@ public class Transition {
         //  The current state is equals to the StateFrom     The state from the stateFrom's machine (the super machine) is equals to the stateFrom
         if(BehaviourEngine.actualState == StateFrom || StateFrom.BehaviourEngine.actualState == StateFrom) {
             Debug.Log("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
-            //Perception.Fire(); // CHANGE
-            
+
             /* EXPERIMENTAL */
             /* Some configurator parameters could be missing here between Exit and Entry */
             StateFrom.Exit();
-            BehaviourEngine.actualState = StateTo;
+            // To change the actualState of the StateFrom Machine, the states should be from the same machine
+            if(StateTo.BehaviourEngine == StateFrom.BehaviourEngine){
+                StateFrom.BehaviourEngine.actualState = StateTo;
+            } 
             StateTo.Entry();
 
             return true;
