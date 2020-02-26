@@ -224,7 +224,7 @@ public class Transition {
     public bool FireTransition()
     {
         //  The current state is equals to the StateFrom     The state from the stateFrom's machine (the super machine) is equals to the stateFrom
-        if(BehaviourEngine.actualState == StateFrom || StateFrom.BehaviourEngine.actualState == StateFrom) { //STATELESS
+        if(BehaviourEngine.actualState == StateFrom || StateFrom.BehaviourEngine.actualState == StateFrom) {
             Debug.Log("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
             //Perception.Fire(); // CHANGE
             

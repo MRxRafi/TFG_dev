@@ -16,7 +16,6 @@ public class StateMachineEngine : BehaviourEngine {
 
         entryState = new State("Entry_Machine", this);
         states.Add(entryState.Name, entryState);
-        BehaviourMachine = new StateMachine<State, Perception>(entryState); //STATELESS
         Active = true;
     }
 
@@ -32,7 +31,7 @@ public class StateMachineEngine : BehaviourEngine {
 
         entryState = new State("Entry_Machine", this);
         states.Add(entryState.Name, entryState);
-        BehaviourMachine = new StateMachine<State, Perception>(entryState); //STATELESS
+        //BehaviourMachine = new StateMachine<State, Perception>(entryState); //STATELESS
         Active = (isSubmachine) ? false : true;
     }
 

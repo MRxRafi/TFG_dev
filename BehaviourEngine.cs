@@ -8,8 +8,6 @@ public abstract class BehaviourEngine {
 
     public const bool IsASubmachine = true;
     public const bool IsNotASubmachine = false;
-
-    //public StateMachine<State, Perception> BehaviourMachine { get; set; } //STATELESS
     public bool Active { get; set; }
     public LeafNode NodeToReturn { get; set; }
     public bool IsSubMachine { get; set; }
