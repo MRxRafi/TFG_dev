@@ -6,7 +6,7 @@ public class StateConfigurator {
     #region variables
 
     public enum STATE_TYPE {EMPTY, NOT_EMPTY};
-    public STATE_TYPE stateType { get; set; } // Maybe this isn't necessary
+    public STATE_TYPE stateType { get; set; }
     public Action entry { get; }
 
     // A Queue is needed as there could be multiple Actions to execute when we exit 
@@ -15,7 +15,6 @@ public class StateConfigurator {
 
     #endregion variables
 
-    // ¿No constructors?
     public StateConfigurator(STATE_TYPE st){
         this.stateType = st;
         exit = new Queue<Action>();
@@ -24,7 +23,6 @@ public class StateConfigurator {
     #region methods
     public StateConfigurator OnEntry(Action method){
         entry = method;
-        this.stateType = this.STATE_TYPE.NOT_EMPTY;
         return this;
     }
 

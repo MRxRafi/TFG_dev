@@ -19,7 +19,7 @@ public class IsInStatePerception : Perception {
 
     public override bool Check()
     {
-        if(engineToLook.BehaviourMachine.State == stateToLook) {
+        if(engineToLook.actualState == stateToLook) {
             return true;
         }
 

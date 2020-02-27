@@ -232,6 +232,7 @@ public abstract class BehaviourEngine {
         }
     }
 
+/*
     /// <summary>
     /// Gets the current state the machine is in
     /// </summary>
@@ -240,6 +241,7 @@ public abstract class BehaviourEngine {
     {
         return BehaviourMachine.State;
     }
+*/
 
     public virtual void Reset()
     {

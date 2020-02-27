@@ -42,7 +42,7 @@ public class StateMachineEngine : BehaviourEngine {
     public void Update()
     {
         foreach(Transition transition in transitions.Values) {
-            if(transition.StateFrom == BehaviourMachine.State) {
+            if(transition.StateFrom == this.actualState) {
                 if(transition.Perception.Check()) {
                     Fire(transition);
                     break;

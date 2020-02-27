@@ -30,16 +30,8 @@ public class Transition {
         this.StateTo = stateTo;
         this.BehaviourEngine = behaviourEngine;
 
-        if(StateFrom == StateTo) {
-            BehaviourEngine.Configure(StateFrom)
-                .OnExit(() => Perception.Reset())
-                .PermitReentry(Perception);
-        }
-        else {
-            BehaviourEngine.Configure(StateFrom)
-                .OnExit(() => Perception.Reset())
-                .Permit(Perception, StateTo);
-        }
+        BehaviourEngine.Configure(StateFrom)
+            .OnExit(() => Perception.Reset());
     }
 
     /// <summary>
