@@ -7,7 +7,7 @@ public class StateConfigurator {
 
     public enum STATE_TYPE {EMPTY, NOT_EMPTY};
     public STATE_TYPE stateType { get; set; }
-    public Action entry { get; }
+    public Action entry { get; set; }
 
     // A Queue is needed as there could be multiple Actions to execute when we exit 
     // (the normal Exit + the InternalTransition)

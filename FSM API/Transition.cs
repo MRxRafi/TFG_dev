@@ -1,6 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+//using UnityEngine;
 
 public class Transition {
 
@@ -31,7 +32,7 @@ public class Transition {
         this.BehaviourEngine = behaviourEngine;
 
         BehaviourEngine.Configure(StateFrom)
-            .OnExit(() => Perception.Reset());
+            .OnExit(() => { Perception.Reset(); Console.WriteLine("Percepcion reseteada"); });
     }
 
     /// <summary>
@@ -217,8 +218,8 @@ public class Transition {
     {
         //  The current state is equals to the StateFrom     The state from the stateFrom's machine (the super machine) is equals to the stateFrom
         if(BehaviourEngine.actualState == StateFrom || StateFrom.BehaviourEngine.actualState == StateFrom) {
-            Debug.Log("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
-
+            //Debug.Log("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
+            //Console.WriteLine("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
             /* EXPERIMENTAL */
             /* Some configurator parameters could be missing here between Exit and Entry */
             StateFrom.Exit();

@@ -16,7 +16,7 @@ public abstract class BehaviourEngine {
     protected Dictionary<string, State> states;
     protected State entryState;
 
-    protected State actualState { get; set; }
+    public State actualState { get; set; }
 
     #endregion variables
 

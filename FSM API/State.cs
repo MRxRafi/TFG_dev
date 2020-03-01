@@ -28,7 +28,7 @@ public class State {
     {
         this.Name = stateName;
         this.BehaviourEngine = behaviourEngine;
-        this.configurator = new StateConfigurator(STATE_TYPE.EMPTY);
+        this.configurator = new StateConfigurator(StateConfigurator.STATE_TYPE.EMPTY);
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class State {
         this.Name = stateName;
         this.StateActionVoid = method;
         this.BehaviourEngine = behaviourEngine;
-        this.configurator = new StateConfigurator(STATE_TYPE.NOT_EMPTY);
+        this.configurator = new StateConfigurator(StateConfigurator.STATE_TYPE.NOT_EMPTY);
 
         BehaviourEngine.Configure(this)
             .OnEntry(() => method());
@@ -60,7 +60,7 @@ public class State {
         this.StateActionPerception = method;
         this.StatePerception = (Perception)method.Method.GetParameters().GetValue(0);
         this.BehaviourEngine = behaviourEngine;
-        this.configurator = new StateConfigurator(STATE_TYPE.NOT_EMPTY);
+        this.configurator = new StateConfigurator(StateConfigurator.STATE_TYPE.NOT_EMPTY);
 
         BehaviourEngine.Configure(this)
             .OnEntry(() => method((Perception)method.Method.GetParameters().GetValue(0)));
@@ -77,7 +77,7 @@ public class State {
     {
         this.Name = stateName;
         this.BehaviourEngine = behaviourEngine;
-        this.configurator = new StateConfigurator(STATE_TYPE.NOT_EMPTY);
+        this.configurator = new StateConfigurator(StateConfigurator.STATE_TYPE.NOT_EMPTY);
 
         BehaviourEngine.Configure(this)
             .OnEntry(() => EntrySubmachine(entrySubMachineState, stateTo, subMachine, behaviourEngine));
@@ -97,16 +97,19 @@ public class State {
         subMachine.Active = true;
     }
 
-    private void Entry(){
-        if(this.configurator.stateType != STATE_TYPE.EMPTY){
+    public void Entry(){
+        if(this.configurator.stateType != StateConfigurator.STATE_TYPE.EMPTY){
             configurator.entry();
         }
     }
 
-    private void Exit() {
-        while(configurator.exit.Count != 0){
-            Action toExecute = configurator.exit.Dequeue();
-            toExecute();
+    public void Exit() {
+        // Don't dequeue as I'm not queuing it again.
+        Action[] toExecute = configurator.exit.ToArray();
+        for(int i = 0; i < toExecute.Length; i++)
+        {
+            toExecute[i].Invoke();
         }
+        
     }
 }

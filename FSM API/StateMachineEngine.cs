@@ -41,9 +41,11 @@ public class StateMachineEngine : BehaviourEngine {
     /// </summary>
     public void Update()
     {
+        
         foreach(Transition transition in transitions.Values) {
-            if(transition.StateFrom == this.actualState) {
+            if (transition.StateFrom == this.actualState) {
                 if(transition.Perception.Check()) {
+                    //Console.WriteLine("Transicion lanzada " + transition.Name);
                     Fire(transition);
                     break;
                 }

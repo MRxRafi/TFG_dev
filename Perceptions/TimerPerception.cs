@@ -24,10 +24,10 @@ public class TimerPerception : Perception {
 
     public override bool Check()
     {
-        if(!launched) {
-            timer.Enabled = true;
-            timer.Elapsed += TimerEvent;
-            timer.Start();
+        if(!this.launched) {
+            this.timer.Enabled = true;
+            this.timer.Elapsed += TimerEvent;
+            this.timer.Start();
         }
 
         return launched;
@@ -35,13 +35,13 @@ public class TimerPerception : Perception {
 
     private void TimerEvent(object sender, ElapsedEventArgs e)
     {
-        launched = true;
+        this.launched = true;
     }
 
     public override void Reset()
     {
-        timer.Enabled = false;
-        launched = false;
-        timer.Stop();
+        this.timer.Enabled = false;
+        this.launched = false;
+        this.timer.Stop();
     }
 }
