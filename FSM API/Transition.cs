@@ -54,6 +54,8 @@ public class Transition {
         if(stateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             this.BehaviourEngine = superMachine;
             Perception.SetBehaviourMachine(superMachine);
+            /* TODO Queue bug, adding InternalTransition and doing it multiple time as no deleting when is used
+            Fix in StateConfigurator.cs */
             superMachine.Configure(StateFrom)
                 .OnExit(() => Perception.Reset())
                 .InternalTransition(Perception, () => ExitTransition(StateFrom, StateTo, subMachine.GetState("Entry_Machine"), superMachine, subMachine));
