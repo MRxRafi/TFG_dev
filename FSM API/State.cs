@@ -102,14 +102,20 @@ public class State {
             configurator.entry();
         }
     }
-
-    public void Exit() {
-        // Don't dequeue as I'm not queuing it again.
-        Action[] toExecute = configurator.exit.ToArray();
-        for(int i = 0; i < toExecute.Length; i++)
+    public void InternalTransition(String tName)
+    {
+        Action toExecute;
+        if (configurator.internalTransition.TryGetValue(tName, out toExecute))
         {
-            toExecute[i].Invoke();
+            toExecute.Invoke();
         }
-        
+    }
+
+    public void Exit(String tName) {
+        Action toExecute;
+        if (configurator.exit.TryGetValue(tName, out toExecute))
+        {
+            toExecute.Invoke();
+        }              
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
 
 public class Testing{
@@ -34,13 +33,18 @@ public class Testing{
         testMachine.CreateTransition("e_sub", st3, p, stSub);
         
         subMachine.CreateTransition("e_sTest1", subMachine.GetEntryState(), pSub, sub_2);
-        subMachine.CreateExitTransition("e_sTest2", stSub, p, testMachine.GetEntryState());
+        subMachine.CreateTransition("e_sTest2", sub_2, pSub, subMachine.GetEntryState());
+        subMachine.CreateExitTransition("e_sTest3", stSub, p, testMachine.GetEntryState());
 
 
         // Update tick emulation (e.g like Unity)
         //Timer timerUpdate = new Timer((e) => { testMachine.Update(); subMachine.Update(); }, null, 70, 70);
         // ELAPSED crea hilos 
-        while (true) { testMachine.Update(); subMachine.Update(); }
+        System.Timers.Timer tmr = new System.Timers.Timer();
+        tmr.Interval = 100;
+        tmr.AutoReset = false;
+        tmr.Elapsed += (s, e) => { testMachine.Update(); subMachine.Update(); tmr.Enabled = true; };
+        tmr.Enabled = true;
         Console.ReadKey();
 
     }

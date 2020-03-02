@@ -9,15 +9,15 @@ public class StateConfigurator {
     public STATE_TYPE stateType { get; set; }
     public Action entry { get; set; }
 
-    // A Queue is needed as there could be multiple Actions to execute when we exit 
-    // (the normal Exit + the InternalTransition)
-    public Queue<Action> exit;
+    public Dictionary<String,Action> exit;
+    public Dictionary<String, Action> internalTransition;
 
     #endregion variables
 
     public StateConfigurator(STATE_TYPE st){
         this.stateType = st;
-        exit = new Queue<Action>();
+        exit = new Dictionary<string, Action>();
+        internalTransition = new Dictionary<string, Action>();
     }
 
     #region methods
@@ -26,13 +26,13 @@ public class StateConfigurator {
         return this;
     }
 
-    public StateConfigurator OnExit(Action method){
-        exit.Enqueue(method);
+    public StateConfigurator OnExit(String name, Action method){
+        if (!exit.ContainsKey(name)) exit.Add(name, method);
         return this;
     }
 
-    public StateConfigurator InternalTransition(Perception perception, Action method){
-        exit.Enqueue(method);
+    public StateConfigurator InternalTransition(Perception perception, String name, Action method){
+        if(!internalTransition.ContainsKey(name)) internalTransition.Add(name, method);
         return this;
     }
     #endregion methods
