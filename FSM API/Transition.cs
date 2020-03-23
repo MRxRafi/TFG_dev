@@ -231,8 +231,10 @@ public class Transition {
             // To change the actualState of the StateFrom Machine, the states should be from the same machine
             if(StateTo.BehaviourEngine == StateFrom.BehaviourEngine){
                 StateFrom.BehaviourEngine.actualState = StateTo;
-            } 
-            StateTo.Entry();
+            }
+
+            //Entry is done in StateFrom.InternalTransition so there's no need to do the entry again
+            if (this.type != TRANSITION_TYPE.SUPER_TRANSITION) StateTo.Entry();
 
             return true;
         }
