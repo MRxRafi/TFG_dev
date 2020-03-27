@@ -29,15 +29,22 @@ public class Testing{
         // Perceptions
         TimerPerception p = testMachine.CreatePerception<TimerPerception>(3);
         TimerPerception pSub = subMachine.CreatePerception<TimerPerception>(1.5f);
-        
+        KeyPerception pSpace = testMachine.CreatePerception<KeyPerception>(new KeyPerception(ConsoleKey.Spacebar, testMachine));
+        KeyPerception pQ = subMachine.CreatePerception<KeyPerception>(new KeyPerception(ConsoleKey.Q, subMachine));
+        KeyPerception pW = subMachine.CreatePerception<KeyPerception>(new KeyPerception(ConsoleKey.W, subMachine));
+
         // Transitions
         testMachine.CreateTransition("e_st2", testMachine.GetEntryState(), p, st2);
-        testMachine.CreateTransition("e_st3", st2, p, st3);
+        testMachine.CreateTransition("e_st3", st2, pSpace, st3);
         testMachine.CreateTransition("e_sub", st3, p, stSub);
         
-        subMachine.CreateTransition("e_sTest1", subMachine.GetEntryState(), pSub, sub_2);
+        /* TRANSICION ENTRE ESTADOS
+         *  - Para salir de la submáquina: Pulsar letra Q
+         *  - Para salir del estado 1 de la submáquina: letra W
+         * */
+        subMachine.CreateTransition("e_sTest1", subMachine.GetEntryState(), pW, sub_2);
         subMachine.CreateTransition("e_sTest2", sub_2, pSub, subMachine.GetEntryState());
-        subMachine.CreateExitTransition("e_sTest3", stSub, p, testMachine.GetEntryState());
+        subMachine.CreateExitTransition("e_sTest3", stSub, pQ, testMachine.GetEntryState());
 
 
         // Update tick emulation (e.g like Unity)
@@ -48,7 +55,13 @@ public class Testing{
         tmr.AutoReset = false;
         tmr.Elapsed += (s, e) => { testMachine.Update(); subMachine.Update(); tmr.Enabled = true; };
         tmr.Enabled = true;
-        Console.ReadKey();
+
+        // To prevent the app closing
+        // Si se usa EspacioPerception hay que pulsar dos veces espacio para que haga caso
+        while (true)
+        {
+            System.Console.ReadKey();
+        };
 
     }
 }
