@@ -12,6 +12,10 @@ public abstract class BehaviourEngine {
     public LeafNode NodeToReturn { get; set; }
     public bool IsSubMachine { get; set; }
 
+    /* TODO ¿Transiciones y estados por id (int) en vez de por string?
+     Diferencias en HashCode:
+     https://stackoverflow.com/questions/15632300/which-is-faster-string-or-integer-has-hashkey-in-java
+     https://stackoverflow.com/questions/5743474/key-performance-for-a-dictionary (C#)*/
     protected Dictionary<string, Transition> transitions;
     protected Dictionary<string, State> states;
     protected State entryState;

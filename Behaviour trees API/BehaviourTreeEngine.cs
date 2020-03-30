@@ -26,6 +26,7 @@ public class BehaviourTreeEngine : BehaviourEngine {
         base.IsSubMachine = false;
 
         entryState = new State("Entry_Machine", this);
+        this.actualState = entryState;
         states.Add(entryState.Name, entryState);
 
         Active = true;
@@ -43,6 +44,7 @@ public class BehaviourTreeEngine : BehaviourEngine {
         base.IsSubMachine = isSubmachine;
 
         entryState = new State("Entry_Machine", this);
+        this.actualState = entryState;
         states.Add(entryState.Name, entryState);
 
         Active = (isSubmachine) ? false : true;

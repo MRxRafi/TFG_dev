@@ -32,7 +32,8 @@ public class StateConfigurator {
     }
 
     public StateConfigurator InternalTransition(Perception perception, String name, Action method){
-        if(!internalTransition.ContainsKey(name)) internalTransition.Add(name, method);
+        /* TODO ¿Es necesaria la percepción?*/
+        if (!internalTransition.ContainsKey(name)) internalTransition.Add(name, method);
         return this;
     }
     #endregion methods
