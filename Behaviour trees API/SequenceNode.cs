@@ -19,7 +19,9 @@ public class SequenceNode : TreeNode {
         this.randomSequence = randomSequence;
         base.HasSubmachine = false;
         base.behaviourTree = behaviourTree;
-        base.StateNode = new State(name, FireNextNode, behaviourTree);
+        base.StateNode = new State(name, () => { }, behaviourTree); // ACTION vacío para evitar errores
+        // ¿BUG? Si se mete en FireNextNode en la transición, podría haber un error en cadena
+        // Selector dentro de Sequence: nodo activo se queda en Selector y no en su hijo
 
         if(randomSequence) {
             RandomizeChildren();
@@ -62,17 +64,19 @@ public class SequenceNode : TreeNode {
 
         ReturnValue = ReturnValues.Running;
 
-        if(childrenIndex == 0) {
+        if (childrenIndex == 0)
+        {
             new Transition("to the first node", StateNode, new PushPerception(behaviourTree), childrenNodes[childrenIndex].StateNode, behaviourTree)
                 .FireTransition();
         }
-        else {
+        else
+        {
             new Transition("to next node", StateNode, new PushPerception(behaviourTree), childrenNodes[childrenIndex].StateNode, behaviourTree)
                 .FireTransition();
         }
 
         // Activates de child node in the Behaviour tree
-        if(childrenNodes[childrenIndex].ReturnValue == ReturnValues.Running) {
+        if (childrenNodes[childrenIndex].ReturnValue == ReturnValues.Running) {
             behaviourTree.ActiveNode = childrenNodes[childrenIndex];
         }
 
@@ -81,23 +85,34 @@ public class SequenceNode : TreeNode {
 
     public override void Update()
     {
-        if(childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Succeed) {
-            if(childrenIndex < childrenNodes.Count) {
-                FireNextNode();
+        if(childrenIndex == 0)
+        {
+            FireNextNode();
+        } else
+        {
+            if (childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Succeed)
+            {
+                if (childrenIndex < childrenNodes.Count)
+                {
+                    FireNextNode();
+                }
+                else if (ReturnNodeValue() == ReturnValues.Succeed)
+                {
+                    ReturnToParent();
+                    ResetChildren();
+                    childrenIndex = 0;
+                    ReturnValue = ReturnValues.Succeed;
+                }
             }
-            else if(ReturnNodeValue() == ReturnValues.Succeed) {
+            else if (childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Failed)
+            {
                 ReturnToParent();
                 ResetChildren();
                 childrenIndex = 0;
-                ReturnValue = ReturnValues.Succeed;
+                ReturnValue = ReturnValues.Failed;
             }
         }
-        else if(childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Failed) {
-            ReturnToParent();
-            ResetChildren();
-            childrenIndex = 0;
-            ReturnValue = ReturnValues.Failed;
-        }
+        
     }
 
     private void ResetChildren()

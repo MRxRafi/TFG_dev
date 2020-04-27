@@ -84,6 +84,7 @@ public class BehaviourTreeEngine : BehaviourEngine {
             return;
 
         if(ActiveNode != null && ActiveNode.ReturnValue == ReturnValues.Running) { // Node with NO submachine in it
+            //Console.WriteLine(ActiveNode.StateNode.Name + " " + ActiveNode.ReturnValue);
             ActiveNode.Update();
         }
         else if(ActiveNode.HasSubmachine) { // Node with a submachine in it

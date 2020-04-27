@@ -18,7 +18,7 @@ public class SelectorNode : TreeNode {
         this.childrenIndex = 0;
         base.HasSubmachine = false;
         base.behaviourTree = behaviourTree;
-        base.StateNode = new State(name, SelectChild, behaviourTree);
+        base.StateNode = new State(name, () => { }, behaviourTree); // ACTION vacío para evitar errores
     }
 
     public void AddChild(TreeNode childNode)
@@ -42,28 +42,37 @@ public class SelectorNode : TreeNode {
 
         ReturnValue = ReturnValues.Running;
 
-        if(childrenIndex == 0) {
+        if (childrenIndex == 0)
+        {
+            //Console.WriteLine("Transicion a primer hijo");
             new Transition("to first child", StateNode, new PushPerception(behaviourTree), childrenNodes[childrenIndex].StateNode, behaviourTree)
                 .FireTransition();
         }
-        else {
-            try {
+        else
+        {
+            try
+            {
+                //Console.WriteLine("Transicion al siguiente hijo");
                 new Transition("to next child", StateNode, new PushPerception(behaviourTree), childrenNodes[childrenIndex].StateNode, behaviourTree)
                     .FireTransition();
             }
-            catch {
+            catch
+            {
                 ReturnToParent();
                 ResetChildren();
                 childrenIndex = 0;
                 ReturnValue = ReturnValues.Failed;
-                //throw new Exception("No child node was selected");
             }
+
         }
 
         // Activates de child node in the Behaviour tree
-        if(childrenNodes[childrenIndex].ReturnValue == ReturnValues.Running) {
-            behaviourTree.ActiveNode = childrenNodes[childrenIndex];
+        if (childrenNodes[childrenIndex].ReturnValue == ReturnValues.Running)
+        {
+            behaviourTree.ActiveNode = childrenNodes[childrenIndex]; 
+            //Console.WriteLine(behaviourTree.ActiveNode.StateNode.Name + " activo");
         }
+
         childrenIndex++;
     }
 
@@ -76,24 +85,38 @@ public class SelectorNode : TreeNode {
 
     public override void Update()
     {
-        if(childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Failed) {
-            if(childrenIndex < childrenNodes.Count) {
-                SelectChild();
-            }
-            else if(ReturnNodeValue() == ReturnValues.Failed) {
-                ReturnToParent();
-                ResetChildren();
-                childrenIndex = 0;
-                ReturnValue = ReturnValues.Failed;
-            }
+        if (childrenIndex == 0)
+        {
+            SelectChild();
         }
-        else if(childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Succeed) {
-            if(ReturnNodeValue() == ReturnValues.Succeed) {
-                selectedChild = childrenNodes[childrenIndex - 1];
-                ReturnToParent();
-                ResetChildren();
-                childrenIndex = 0;
-                ReturnValue = ReturnValues.Succeed;
+        else
+        {
+            if (childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Failed)
+            {
+                //Console.WriteLine("Actualiza primer if");
+                if (childrenIndex < childrenNodes.Count)
+                {
+                    SelectChild();
+                }
+                else if (ReturnNodeValue() == ReturnValues.Failed)
+                {
+                    ReturnToParent();
+                    ResetChildren();
+                    childrenIndex = 0;
+                    ReturnValue = ReturnValues.Failed;
+                }
+            }
+            else if (childrenNodes[childrenIndex - 1].ReturnValue == ReturnValues.Succeed)
+            {
+                //Console.WriteLine("Actualiza segundo if");
+                if (ReturnNodeValue() == ReturnValues.Succeed)
+                {
+                    selectedChild = childrenNodes[childrenIndex - 1];
+                    ReturnToParent();
+                    ResetChildren();
+                    childrenIndex = 0;
+                    ReturnValue = ReturnValues.Succeed;
+                }
             }
         }
     }

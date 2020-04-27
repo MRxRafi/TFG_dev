@@ -4,19 +4,24 @@ using System.Collections.Generic;
 
 
 public class Testing{
-    private static StateMachineEngine testMachine;
-    private static StateMachineEngine subMachine;
+    //private static StateMachineEngine testMachine;
+    //private static StateMachineEngine subMachine;
     private static BehaviourTreeEngine subBTMachine;
+    /*
     private static TimerPerception p;
     private static TimerPerception pSub;
     private static KeyPerception pQ;
     private static KeyPerception pW;
+    */
+
+    private static bool lockedDoor = false;
+    private static bool key = false;
 
     static public void Main(String[] args)
     {
         CreateSubBehaviourMachine();
-        CreateSubMachine();
-        CreateMainMachine();
+        //CreateSubMachine();
+        //CreateMainMachine();
 
         /* ERRORES después de la primera iteracion al entrar en la submaquina pasa del estado de la 
            submaquina 1 al 2 sin que haga caso al timerperception, al entrar al estado de entrada de 
@@ -33,9 +38,12 @@ public class Testing{
         System.Timers.Timer tmr = new System.Timers.Timer();
         tmr.Interval = 100;
         tmr.AutoReset = false;
-        tmr.Elapsed += (s, e) => { testMachine.Update();
-            subMachine.Update();
-            subBTMachine.Update(); tmr.Enabled = true; };
+        tmr.Elapsed += (s, e) => {
+            //testMachine.Update();
+            //subMachine.Update();
+            subBTMachine.Update();
+            tmr.Enabled = true;
+        };
         tmr.Enabled = true;
 
         // To prevent the app closing
@@ -46,7 +54,7 @@ public class Testing{
         };
 
     }
-
+    /*
     private static void CreateMainMachine()
     {
         testMachine = new StateMachineEngine(false);
@@ -87,23 +95,72 @@ public class Testing{
         BehaviourTreeStatusPerception succeed = subMachine.CreatePerception<BehaviourTreeStatusPerception>(subBTMachine, ReturnValues.Succeed);
         subBTMachine.CreateExitTransition("e_sTest3", subBTState, succeed, subMachine.GetEntryState());
     }
+    */
 
     private static void CreateSubBehaviourMachine()
     {
-        subBTMachine = new BehaviourTreeEngine(true);
+        subBTMachine = new BehaviourTreeEngine(false);
 
-        SequenceNode sn1 = subBTMachine.CreateSequenceNode("s_1", false);
+        SequenceNode root = subBTMachine.CreateSequenceNode("root", false);
+        SelectorNode select = subBTMachine.CreateSelectorNode("select");
+        SequenceNode unlock = subBTMachine.CreateSequenceNode("unlock", false);
 
-        LeafNode tn = subBTMachine.CreateLeafNode("ts_2_action",
-            () => Console.WriteLine("[SUB_BT] Secuencia activada, nodo 1."),
+        LeafNode walkToDoor1 = subBTMachine.CreateLeafNode("walk_door1",
+            () => Console.WriteLine("[WALK_TO] Andando a la puerta."),
             () => { return ReturnValues.Succeed; });
-        LeafNode tn2 = subBTMachine.CreateLeafNode("s_3_action",
-            () => Console.WriteLine("[SUB_BT] Secuencia activada, nodo 2."),
+        LeafNode walkToDoor2 = subBTMachine.CreateLeafNode("walk_door2",
+            () => Console.WriteLine("[WALK_TO] Andando a la puerta."),
             () => { return ReturnValues.Succeed; });
-        TimerDecoratorNode tdn = subBTMachine.CreateTimerNode("ts_2", tn, 1);
-        sn1.AddChild(tdn);
-        sn1.AddChild(tn2);
+        LeafNode enterHouse = subBTMachine.CreateLeafNode("enter_house",
+            () => Console.WriteLine("[ROOT] Entrando a la casa."),
+            () => { return ReturnValues.Succeed; });
+        LeafNode openDoor1 = subBTMachine.CreateLeafNode("oDoor1",
+            () => Console.WriteLine("[UNLOCKED_DOOR] Abriendo puerta"),
+            () => {
+                if (!lockedDoor) return ReturnValues.Succeed;
+                Console.WriteLine("Ha retornado failed.");
+                return ReturnValues.Failed;
+            });
+        LeafNode openDoor2 = subBTMachine.CreateLeafNode("oDoor2",
+            () => Console.WriteLine("[UNLOCKED_DOOR] Abriendo puerta"),
+            () => {
+                if (!lockedDoor) return ReturnValues.Succeed;
+                return ReturnValues.Failed;
+            });
 
-        subBTMachine.SetRootNode(sn1);
+        LeafNode unlockDoor = subBTMachine.CreateLeafNode("uDoor",
+            () => {
+
+                if (key)
+                {
+                    Console.WriteLine("[COLLECT_KEY] Recogiendo llave.");
+                    lockedDoor = false;
+                } else
+                {
+                    Console.WriteLine("[COLLECT_KEY] No hay llave que recoger.");
+                }
+            },
+            () => { 
+                if(key) return ReturnValues.Succeed;
+                return ReturnValues.Failed;
+            });
+
+        LeafNode explodeDoor = subBTMachine.CreateLeafNode("eDoor",
+            () => Console.WriteLine("[CLOSED_DOOR] No hay llave. No queda otra que reventar la puerta."),
+            () => { return ReturnValues.Succeed; });
+
+        unlock.AddChild(unlockDoor);
+        unlock.AddChild(walkToDoor1);
+        unlock.AddChild(openDoor1);
+
+        select.AddChild(openDoor2);
+        select.AddChild(unlock);
+        select.AddChild(explodeDoor);
+
+        root.AddChild(walkToDoor2);
+        root.AddChild(select);
+        root.AddChild(enterHouse);
+
+        subBTMachine.SetRootNode(root);
     }
 }

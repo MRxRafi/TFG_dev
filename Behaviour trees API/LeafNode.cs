@@ -33,14 +33,15 @@ public class LeafNode : TreeNode {
     /// </summary>
     private void NodeAction()
     {
-        if(ReturnValue == ReturnValues.Running) {
+        //Console.WriteLine("Nodo hoja action");
+        if (ReturnValue == ReturnValues.Running) {
             nodeAction();
         }
     }
 
     public override void Update()
     {
-        if(ReturnNodeValue() != ReturnValues.Running) {
+        if (ReturnNodeValue() != ReturnValues.Running) {
             ReturnToParent();
         }
     }
