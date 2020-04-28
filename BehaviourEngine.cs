@@ -213,6 +213,22 @@ public abstract class BehaviourEngine {
     }
 
     /// <summary>
+    /// Fires the transition
+    /// </summary>
+    /// <param name="perception">The perception that will trigger the transition associated</param>
+    public void Fire(Perception perception)
+    {
+        // INNEFICIENT. Change the storage of transitions to find them by perception too.
+        foreach(Transition t in transitions.Values)
+        {
+            if (t.Perception.Equals(perception))
+            {
+                t.FireTransition();
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the entry state of the State Machine
     /// </summary>
     /// <returns></returns>
