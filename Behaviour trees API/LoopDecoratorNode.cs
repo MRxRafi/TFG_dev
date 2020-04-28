@@ -40,7 +40,7 @@ public class LoopDecoratorNode : TreeNode {
         this.timesLooped = 0;
         base.Child = child;
         Child.ParentNode = this;
-        base.StateNode = new State(name, ToChild, behaviourTree);
+        base.StateNode = new State(name, () => { }, behaviourTree); //Null action to prevent errors
         base.behaviourTree = behaviourTree;
     }
 
@@ -68,7 +68,8 @@ public class LoopDecoratorNode : TreeNode {
 
     public override void Update()
     {
-        if(Child.ReturnValue != ReturnValues.Running) {
+        if (!firstExecution) { ToChild(); firstExecution = true; }; // First loop goes to child
+        if (Child.ReturnValue != ReturnValues.Running) {
             if(ReturnNodeValue() != ReturnValues.Running) {
                 ReturnToParent();
                 Child.Reset();
@@ -80,8 +81,8 @@ public class LoopDecoratorNode : TreeNode {
     public override ReturnValues ReturnNodeValue()
     {
         timesLooped += (loopTimes != -1) ? 1 : 0;
-
-        if(loopTimes == -1) {
+        Console.WriteLine(timesLooped);
+        if (loopTimes == -1) {
             Loop();
         }
         else if(timesLooped < loopTimes) {
@@ -96,7 +97,7 @@ public class LoopDecoratorNode : TreeNode {
 
     public override void Reset()
     {
-        ReturnValue = ReturnValues.Running;
+        base.Reset();
         timesLooped = 0;
     }
 }

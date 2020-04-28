@@ -14,6 +14,8 @@ public abstract class TreeNode {
 
     protected BehaviourTreeEngine behaviourTree;
 
+    protected bool firstExecution = false;
+
     #endregion variables
 
     /// <summary>
@@ -40,6 +42,7 @@ public abstract class TreeNode {
     public virtual void Reset()
     {
         ReturnValue = ReturnValues.Running;
+        firstExecution = false;
     }
 
     /// <summary>

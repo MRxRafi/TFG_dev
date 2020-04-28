@@ -141,7 +141,7 @@ public class SequenceNode : TreeNode {
 
     public override void Reset()
     {
-        ReturnValue = ReturnValues.Running;
+        base.Reset();
         childrenIndex = 0;
     }
 }

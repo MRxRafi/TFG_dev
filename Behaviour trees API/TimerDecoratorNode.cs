@@ -9,7 +9,6 @@ public class TimerDecoratorNode : TreeNode {
     private float time;
     private bool transitionLaunched;
     private Transition timerTransition;
-
     #endregion variables
 
     public TimerDecoratorNode(string name, TreeNode child, float time, BehaviourTreeEngine behaviourTree)
@@ -18,7 +17,7 @@ public class TimerDecoratorNode : TreeNode {
         this.transitionLaunched = false;
         base.Child = child;
         Child.ParentNode = this;
-        base.StateNode = new State(name, ToChild, behaviourTree);
+        base.StateNode = new State(name, () => { }, behaviourTree); // Empty action to prevent going to child too early
         base.behaviourTree = behaviourTree;
     }
 
@@ -34,7 +33,8 @@ public class TimerDecoratorNode : TreeNode {
 
     public override void Update()
     {
-        if(!transitionLaunched && timerTransition.Perception.Check()) {
+        if (!firstExecution) { ToChild(); firstExecution = true; }; // First loop goes to child
+        if (!transitionLaunched && timerTransition.Perception.Check()) {
             timerTransition.FireTransition();
             transitionLaunched = true;
             behaviourTree.ActiveNode = Child;
@@ -53,7 +53,7 @@ public class TimerDecoratorNode : TreeNode {
 
     public override void Reset()
     {
-        ReturnValue = ReturnValues.Running;
+        base.Reset();
         transitionLaunched = false;
         if(timerTransition != null) {
             timerTransition.Perception.Reset();

@@ -8,7 +8,7 @@ public class InverterDecoratorNode : TreeNode {
     {
         base.Child = child;
         Child.ParentNode = this;
-        base.StateNode = new State(name, ToChild, behaviourTree);
+        base.StateNode = new State(name, () => { }, behaviourTree); // Empty action to prevent errors
         base.behaviourTree = behaviourTree;
     }
 
@@ -27,7 +27,8 @@ public class InverterDecoratorNode : TreeNode {
 
     public override void Update()
     {
-        if(Child.ReturnValue != ReturnValues.Running) {
+        if (!firstExecution) { ToChild(); firstExecution = true; }; // First loop goes to child
+        if (Child.ReturnValue != ReturnValues.Running) {
             if(ReturnNodeValue() != ReturnValues.Running) {
                 ReturnToParent();
                 Child.Reset();

@@ -34,7 +34,7 @@ public class Transition {
         this.type = TRANSITION_TYPE.NORMAL;
 
         BehaviourEngine.Configure(StateFrom)
-            .OnExit(this.Name, () => { Perception.Reset(); Console.WriteLine("Percepcion reseteada"); });
+            .OnExit(this.Name, () => { Perception.Reset(); });
     }
 
     /// <summary>

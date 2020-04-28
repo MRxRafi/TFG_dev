@@ -140,7 +140,7 @@ public class SelectorNode : TreeNode {
 
     public override void Reset()
     {
-        ReturnValue = ReturnValues.Running;
+        base.Reset();
         childrenIndex = 0;
     }
 }

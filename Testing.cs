@@ -14,8 +14,8 @@ public class Testing{
     private static KeyPerception pW;
     */
 
-    private static bool lockedDoor = false;
-    private static bool key = false;
+    private static bool lockedDoor = true;
+    private static bool key = true;
 
     static public void Main(String[] args)
     {
@@ -110,7 +110,7 @@ public class Testing{
             () => { return ReturnValues.Succeed; });
         LeafNode walkToDoor2 = subBTMachine.CreateLeafNode("walk_door2",
             () => Console.WriteLine("[WALK_TO] Andando a la puerta."),
-            () => { return ReturnValues.Succeed; });
+            () => { return ReturnValues.Failed; });
         LeafNode enterHouse = subBTMachine.CreateLeafNode("enter_house",
             () => Console.WriteLine("[ROOT] Entrando a la casa."),
             () => { return ReturnValues.Succeed; });
@@ -122,7 +122,7 @@ public class Testing{
                 return ReturnValues.Failed;
             });
         LeafNode openDoor2 = subBTMachine.CreateLeafNode("oDoor2",
-            () => Console.WriteLine("[UNLOCKED_DOOR] Abriendo puerta"),
+            () => Console.WriteLine("[LOCKED_DOOR] Abriendo puerta"),
             () => {
                 if (!lockedDoor) return ReturnValues.Succeed;
                 return ReturnValues.Failed;
@@ -149,6 +149,9 @@ public class Testing{
             () => Console.WriteLine("[CLOSED_DOOR] No hay llave. No queda otra que reventar la puerta."),
             () => { return ReturnValues.Succeed; });
 
+        TimerDecoratorNode test = subBTMachine.CreateTimerNode("timer", walkToDoor2, 1);
+        LoopUntilFailDecoratorNode test2 = subBTMachine.CreateLoopUntilFailNode("loop", test);
+
         unlock.AddChild(unlockDoor);
         unlock.AddChild(walkToDoor1);
         unlock.AddChild(openDoor1);
@@ -157,7 +160,7 @@ public class Testing{
         select.AddChild(unlock);
         select.AddChild(explodeDoor);
 
-        root.AddChild(walkToDoor2);
+        root.AddChild(test2);
         root.AddChild(select);
         root.AddChild(enterHouse);
 

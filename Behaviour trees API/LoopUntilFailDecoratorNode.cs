@@ -8,7 +8,7 @@ public class LoopUntilFailDecoratorNode : TreeNode {
     {
         base.Child = child;
         Child.ParentNode = this;
-        base.StateNode = new State(name, ToChild, behaviourTree);
+        base.StateNode = new State(name, () => { }, behaviourTree); // Empty action to prevent going to child too early
         base.behaviourTree = behaviourTree;
     }
 
@@ -27,7 +27,8 @@ public class LoopUntilFailDecoratorNode : TreeNode {
 
     public override void Update()
     {
-        if(ReturnNodeValue() == ReturnValues.Succeed) {
+        if (!firstExecution) { ToChild(); firstExecution = true; }; // First loop goes to child
+        if (ReturnNodeValue() == ReturnValues.Succeed) {
             ReturnToParent();
             Child.Reset();
         }
@@ -53,4 +54,5 @@ public class LoopUntilFailDecoratorNode : TreeNode {
 
         return ReturnValue;
     }
+
 }
