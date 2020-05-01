@@ -5,32 +5,26 @@ using System.Collections.Generic;
 
 public class Testing{
     //private static StateMachineEngine testMachine;
-    //private static StateMachineEngine subMachine;
-    private static BehaviourTreeEngine subBTMachine;
-    /*
-    private static TimerPerception p;
-    private static TimerPerception pSub;
-    private static KeyPerception pQ;
-    private static KeyPerception pW;
-    */
+    private static StateMachineEngine subMachine;
+    private static BehaviourTreeEngine BTMachine;
+    
+    private static Perception massPutted;
+    private static Perception tomatoPutted;
+    private static Perception nextTopping;
+    private static Perception allToppings;
+    private static LeafNode subFSM;
 
-    private static bool lockedDoor = true;
-    private static bool key = true;
+    private static int actualIngredient = 0;
 
     static public void Main(String[] args)
     {
+        BTMachine = new BehaviourTreeEngine(BehaviourEngine.IsNotASubmachine);
+        subMachine = new StateMachineEngine(BehaviourEngine.IsASubmachine);
+
+        CreateSubMachine();
         CreateSubBehaviourMachine();
-        //CreateSubMachine();
         //CreateMainMachine();
 
-        /* ERRORES después de la primera iteracion al entrar en la submaquina pasa del estado de la 
-           submaquina 1 al 2 sin que haga caso al timerperception, al entrar al estado de entrada de 
-           la supermaquina entra 2 veces*/
-
-        /* TRANSICION ENTRE ESTADOS
-         *  - Para salir de la submáquina: Pulsar letra Q
-         *  - Para salir del estado 1 de la submáquina: letra W
-         * */
 
         // Update tick emulation (e.g like Unity)
         //Timer timerUpdate = new Timer((e) => { testMachine.Update(); subMachine.Update(); }, null, 70, 70);
@@ -40,8 +34,8 @@ public class Testing{
         tmr.AutoReset = false;
         tmr.Elapsed += (s, e) => {
             //testMachine.Update();
-            //subMachine.Update();
-            subBTMachine.Update();
+            subMachine.Update();
+            BTMachine.Update();
             tmr.Enabled = true;
         };
         tmr.Enabled = true;
@@ -75,95 +69,74 @@ public class Testing{
         testMachine.CreateTransition("e_sub", st3, p, stSub);
         subMachine.CreateExitTransition("e_sub_exit", stSub, pQ, testMachine.GetEntryState());
     }
-
+    */
     private static void CreateSubMachine()
     {
-        subMachine = new StateMachineEngine(true);
+        //Perceptions
+        massPutted = subMachine.CreatePerception<TimerPerception>(1);
+        tomatoPutted = subMachine.CreatePerception<TimerPerception>(1);
+        nextTopping = subMachine.CreatePerception<TimerPerception>(1);
+        allToppings = subMachine.CreatePerception<PushPerception>();
 
-        subMachine.CreateEntryState("subTest1", () => Console.WriteLine("[SUBMAQUINA] Estado 1 activado."));
+        //States
+        State putMass = subMachine.CreateEntryState("put_mass",
+                        () => Console.WriteLine("[SUBFSM] Putting mass."));
+        State putTomato = subMachine.CreateState("put_tomato",
+                        () => Console.WriteLine("[SUBFSM] Putting tomato."));
+        State putTopping = subMachine.CreateState("put_topping", PutTopping);
 
-        State sub_2 = subMachine.CreateState("subTest2", () => Console.WriteLine("[SUBMAQUINA] Estado 2 activado."));
-        State subBTState = subMachine.CreateSubStateMachine("subMachine", subBTMachine);
+        //Transitions
+        subMachine.CreateTransition("mass_putted", putMass, massPutted, putTomato);
+        subMachine.CreateTransition("tomato_putted", putTomato, tomatoPutted, putTopping);
+        subMachine.CreateTransition("next_topping", putTopping, nextTopping, putTopping);
 
-        pSub = subMachine.CreatePerception<TimerPerception>(2.5f);
-        pQ = subMachine.CreatePerception<KeyPerception>(new KeyPerception(ConsoleKey.Q, subMachine));
-        pW = subMachine.CreatePerception<KeyPerception>(new KeyPerception(ConsoleKey.W, subMachine));
-
-        subMachine.CreateTransition("e_sTest1", subMachine.GetEntryState(), pW, sub_2);
-        subMachine.CreateTransition("e_sTest2", sub_2, pSub, subBTState);
-
-        BehaviourTreeStatusPerception succeed = subMachine.CreatePerception<BehaviourTreeStatusPerception>(subBTMachine, ReturnValues.Succeed);
-        subBTMachine.CreateExitTransition("e_sTest3", subBTState, succeed, subMachine.GetEntryState());
+        //Super nodo del árbol de comportamientos y la transición de salida
+        subFSM = BTMachine.CreateSubBehaviour("subFSM", subMachine, putMass);
+        subMachine.CreateExitTransition("back_bt", putTopping, allToppings, ReturnValues.Succeed);
     }
-    */
 
     private static void CreateSubBehaviourMachine()
     {
-        subBTMachine = new BehaviourTreeEngine(false);
+        SequenceNode sequence = BTMachine.CreateSequenceNode("makePizza", false);
 
-        SequenceNode root = subBTMachine.CreateSequenceNode("root", false);
-        SelectorNode select = subBTMachine.CreateSelectorNode("select");
-        SequenceNode unlock = subBTMachine.CreateSequenceNode("unlock", false);
-
-        LeafNode walkToDoor1 = subBTMachine.CreateLeafNode("walk_door1",
-            () => Console.WriteLine("[WALK_TO] Andando a la puerta."),
-            () => { return ReturnValues.Succeed; });
-        LeafNode walkToDoor2 = subBTMachine.CreateLeafNode("walk_door2",
-            () => Console.WriteLine("[WALK_TO] Andando a la puerta."),
-            () => { return ReturnValues.Failed; });
-        LeafNode enterHouse = subBTMachine.CreateLeafNode("enter_house",
-            () => Console.WriteLine("[ROOT] Entrando a la casa."),
-            () => { return ReturnValues.Succeed; });
-        LeafNode openDoor1 = subBTMachine.CreateLeafNode("oDoor1",
-            () => Console.WriteLine("[UNLOCKED_DOOR] Abriendo puerta"),
-            () => {
-                if (!lockedDoor) return ReturnValues.Succeed;
-                Console.WriteLine("Ha retornado failed.");
-                return ReturnValues.Failed;
-            });
-        LeafNode openDoor2 = subBTMachine.CreateLeafNode("oDoor2",
-            () => Console.WriteLine("[LOCKED_DOOR] Abriendo puerta"),
-            () => {
-                if (!lockedDoor) return ReturnValues.Succeed;
-                return ReturnValues.Failed;
-            });
-
-        LeafNode unlockDoor = subBTMachine.CreateLeafNode("uDoor",
-            () => {
-
-                if (key)
-                {
-                    Console.WriteLine("[COLLECT_KEY] Recogiendo llave.");
-                    lockedDoor = false;
-                } else
-                {
-                    Console.WriteLine("[COLLECT_KEY] No hay llave que recoger.");
-                }
-            },
-            () => { 
-                if(key) return ReturnValues.Succeed;
-                return ReturnValues.Failed;
-            });
-
-        LeafNode explodeDoor = subBTMachine.CreateLeafNode("eDoor",
-            () => Console.WriteLine("[CLOSED_DOOR] No hay llave. No queda otra que reventar la puerta."),
+        LeafNode lookRecipe = BTMachine.CreateLeafNode("look_recipe",
+            () => Console.WriteLine("[SEQUENCE] Mirando receta."),
             () => { return ReturnValues.Succeed; });
 
-        TimerDecoratorNode test = subBTMachine.CreateTimerNode("timer", walkToDoor2, 1);
-        LoopUntilFailDecoratorNode test2 = subBTMachine.CreateLoopUntilFailNode("loop", test);
+        LeafNode bake = BTMachine.CreateLeafNode("bake",
+            () => Console.WriteLine("[SEQUENCE] Haciendo pizza. \n ----------------"),
+            () => { return ReturnValues.Succeed; });
 
-        unlock.AddChild(unlockDoor);
-        unlock.AddChild(walkToDoor1);
-        unlock.AddChild(openDoor1);
 
-        select.AddChild(openDoor2);
-        select.AddChild(unlock);
-        select.AddChild(explodeDoor);
+        sequence.AddChild(lookRecipe);
+        sequence.AddChild(subFSM);
+        sequence.AddChild(bake);
 
-        root.AddChild(test2);
-        root.AddChild(select);
-        root.AddChild(enterHouse);
+        LoopDecoratorNode loop = BTMachine.CreateLoopNode("root", sequence);
 
-        subBTMachine.SetRootNode(root);
+        BTMachine.SetRootNode(loop);
+    }
+
+    private static void PutTopping()
+    {
+        switch (actualIngredient)
+        {
+            case 0:
+                Console.WriteLine("[SUBFSM] Poniendo ingrediente 0.");
+                break;
+            case 1:
+                Console.WriteLine("[SUBFSM] Poniendo ingrediente 1.");
+                break;
+            case 2:
+                Console.WriteLine("[SUBFSM] Poniendo ingrediente 2.");
+                break;
+        }
+        actualIngredient++;
+
+        if(actualIngredient == 3)
+        {
+            allToppings.Fire();
+            actualIngredient = 0;
+        }
     }
 }

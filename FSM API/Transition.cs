@@ -123,8 +123,9 @@ public class Transition {
         this.StateFrom = stateFrom;
         this.Perception = perception;
         this.StateTo = stateTo.StateNode;
+        this.type = TRANSITION_TYPE.SUPER_TRANSITION;
 
-        if(StateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
+        if (StateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             this.BehaviourEngine = superMachine;
             Perception.SetBehaviourMachine(superMachine);
             superMachine.Configure(StateFrom)
@@ -156,8 +157,9 @@ public class Transition {
         this.Perception = new OrPerception(new BehaviourTreeStatusPerception(subMachine, ReturnValues.Succeed, subMachine),
                                             new BehaviourTreeStatusPerception(subMachine, ReturnValues.Failed, subMachine),
                                             subMachine);
+        this.type = TRANSITION_TYPE.SUPER_TRANSITION;
 
-        if(StateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
+        if (StateFrom.BehaviourEngine == superMachine) { // Exits from the super-machine
             this.BehaviourEngine = superMachine;
             Perception.SetBehaviourMachine(superMachine);
             superMachine.Configure(StateFrom)
@@ -194,6 +196,9 @@ public class Transition {
             stateTo.ReturnValue = returnValue;
 
             // Transitions from stateFrom -> stateTo
+            // Maybe I should change this too, as I changed the next one?
+            // TODO review if this is working properly
+
             Transition superTransition = new Transition("to_state", stateFrom, new PushPerception(superMachine), stateTo.StateNode, superMachine);
             superTransition.FireTransition();
         }
@@ -208,8 +213,15 @@ public class Transition {
             stateTo.ReturnValue = returnValue;
 
             // Transitions from Supermachine.CurrentState -> stateTo
-            Transition superTransition = new Transition("to_state", superMachine.actualState, new PushPerception(superMachine), stateTo.StateNode, superMachine);
-            superTransition.FireTransition();
+
+            /* ¿BUG?
+             * stateTo SHOULD BE THE SAME AS SuperMachine.CurrentState  --> We are exiting from a machine
+             * that returns Succeed or Failed to the SuperMachine LeafNode, if we enter again to that Node
+             * we are again putting the ReturnType to "process", so we enter in an infinite loop
+             */
+
+            //Transition superTransition = new Transition("to_state", superMachine.actualState, new PushPerception(superMachine), stateTo.StateNode, superMachine);
+            //superTransition.FireTransition();
         }
     }
 

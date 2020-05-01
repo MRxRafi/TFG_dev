@@ -81,7 +81,6 @@ public class LoopDecoratorNode : TreeNode {
     public override ReturnValues ReturnNodeValue()
     {
         timesLooped += (loopTimes != -1) ? 1 : 0;
-        Console.WriteLine(timesLooped);
         if (loopTimes == -1) {
             Loop();
         }
