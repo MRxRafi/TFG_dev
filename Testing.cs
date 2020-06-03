@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 
 public class Testing{
-    //private static StateMachineEngine testMachine;
     private static StateMachineEngine subMachine;
     private static BehaviourTreeEngine BTMachine;
     
@@ -18,6 +17,8 @@ public class Testing{
 
     static public void Main(String[] args)
     {
+        
+        
         BTMachine = new BehaviourTreeEngine(BehaviourEngine.IsNotASubmachine);
         subMachine = new StateMachineEngine(BehaviourEngine.IsASubmachine);
 
@@ -27,7 +28,6 @@ public class Testing{
 
 
         // Update tick emulation (e.g like Unity)
-        //Timer timerUpdate = new Timer((e) => { testMachine.Update(); subMachine.Update(); }, null, 70, 70);
         // ELAPSED crea hilos 
         System.Timers.Timer tmr = new System.Timers.Timer();
         tmr.Interval = 100;
@@ -46,6 +46,7 @@ public class Testing{
         {
             System.Console.ReadKey();
         };
+        
 
     }
     /*
