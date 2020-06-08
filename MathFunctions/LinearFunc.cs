@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class LinearFunc: MathFunc
+public class LinearFunc : MathFunc
 {
     #region variables
 
@@ -23,5 +23,15 @@ public class LinearFunc: MathFunc
     public override float getImage()
     {
         return (m*p.getValue() + c);
+    }
+
+    public void setM(float _m)
+    {
+        this.m = _m;
+    }
+
+    public void setC(float _c)
+    {
+        this.c = _c;
     }
 }

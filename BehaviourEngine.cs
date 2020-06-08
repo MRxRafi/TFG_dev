@@ -252,16 +252,16 @@ public abstract class BehaviourEngine {
         }
     }
 
-/*
+
     /// <summary>
     /// Gets the current state the machine is in
     /// </summary>
     /// <returns></returns>
-    public State GetCurrentState() // ¿QUITAR?
+    public State GetCurrentState()
     {
-        return BehaviourMachine.State;
+        return this.actualState;
     }
-*/
+
 
     public virtual void Reset()
     {

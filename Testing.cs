@@ -3,29 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-public class Testing{
-    private static StateMachineEngine subMachine;
-    private static BehaviourTreeEngine BTMachine;
-    
-    private static Perception massPutted;
-    private static Perception tomatoPutted;
-    private static Perception nextTopping;
-    private static Perception allToppings;
-    private static LeafNode subFSM;
+public class Testing
+{
 
-    private static int actualIngredient = 0;
+    private static UtilityCurvesEngine engine;
+    private static Player p;
+    private static Player p1;
+    private static UtilityPerception perception;
+    private static UtilityPerception perception2;
 
     static public void Main(String[] args)
     {
-        
-        
-        BTMachine = new BehaviourTreeEngine(BehaviourEngine.IsNotASubmachine);
-        subMachine = new StateMachineEngine(BehaviourEngine.IsASubmachine);
+        engine = new UtilityCurvesEngine();
 
-        CreateSubMachine();
-        CreateSubBehaviourMachine();
-        //CreateMainMachine();
+        float[] f = new float[2];
+        f[0] = 1.0f;
+        f[1] = 1.0f;
+        p = new Player(2.0f, f);
+        p1 = new Player(3.0f, f);
 
+        perception = new PlayerPerception(p);
+        perception2 = new PlayerPerception(p1);
+
+        ExpFunc func = new ExpFunc(perception, 2);
+        LinearFunc func2 = new LinearFunc(perception2, 1, 2);
+
+        engine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), func);
+        engine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), func2);
 
         // Update tick emulation (e.g like Unity)
         // ELAPSED crea hilos 
@@ -33,20 +37,28 @@ public class Testing{
         tmr.Interval = 100;
         tmr.AutoReset = false;
         tmr.Elapsed += (s, e) => {
-            //testMachine.Update();
-            subMachine.Update();
-            BTMachine.Update();
+            engine.Update();
             tmr.Enabled = true;
         };
         tmr.Enabled = true;
 
+        
         // To prevent the app closing
         // Si se usa EspacioPerception hay que pulsar dos veces espacio para que haga caso
         while (true)
         {
-            System.Console.ReadKey();
+            ConsoleKeyInfo k = System.Console.ReadKey();
+            if(k.Key == ConsoleKey.UpArrow)
+            {
+                p.life += 1.0f;
+                Console.WriteLine("Vida de P: " + p.life);
+            } else if (k.Key == ConsoleKey.DownArrow)
+            {
+                p.life -= 1.0f;
+                Console.WriteLine("Vida de P: " + p.life);
+            }
         };
-        
+
 
     }
     /*
@@ -71,73 +83,4 @@ public class Testing{
         subMachine.CreateExitTransition("e_sub_exit", stSub, pQ, testMachine.GetEntryState());
     }
     */
-    private static void CreateSubMachine()
-    {
-        //Perceptions
-        massPutted = subMachine.CreatePerception<TimerPerception>(1);
-        tomatoPutted = subMachine.CreatePerception<TimerPerception>(1);
-        nextTopping = subMachine.CreatePerception<TimerPerception>(1);
-        allToppings = subMachine.CreatePerception<PushPerception>();
-
-        //States
-        State putMass = subMachine.CreateEntryState("put_mass",
-                        () => Console.WriteLine("[SUBFSM] Putting mass."));
-        State putTomato = subMachine.CreateState("put_tomato",
-                        () => Console.WriteLine("[SUBFSM] Putting tomato."));
-        State putTopping = subMachine.CreateState("put_topping", PutTopping);
-
-        //Transitions
-        subMachine.CreateTransition("mass_putted", putMass, massPutted, putTomato);
-        subMachine.CreateTransition("tomato_putted", putTomato, tomatoPutted, putTopping);
-        subMachine.CreateTransition("next_topping", putTopping, nextTopping, putTopping);
-
-        //Super nodo del árbol de comportamientos y la transición de salida
-        subFSM = BTMachine.CreateSubBehaviour("subFSM", subMachine, putMass);
-        subMachine.CreateExitTransition("back_bt", putTopping, allToppings, ReturnValues.Succeed);
-    }
-
-    private static void CreateSubBehaviourMachine()
-    {
-        SequenceNode sequence = BTMachine.CreateSequenceNode("makePizza", false);
-
-        LeafNode lookRecipe = BTMachine.CreateLeafNode("look_recipe",
-            () => Console.WriteLine("[SEQUENCE] Mirando receta."),
-            () => { return ReturnValues.Succeed; });
-
-        LeafNode bake = BTMachine.CreateLeafNode("bake",
-            () => Console.WriteLine("[SEQUENCE] Haciendo pizza. \n ----------------"),
-            () => { return ReturnValues.Succeed; });
-
-
-        sequence.AddChild(lookRecipe);
-        sequence.AddChild(subFSM);
-        sequence.AddChild(bake);
-
-        LoopDecoratorNode loop = BTMachine.CreateLoopNode("root", sequence);
-
-        BTMachine.SetRootNode(loop);
-    }
-
-    private static void PutTopping()
-    {
-        switch (actualIngredient)
-        {
-            case 0:
-                Console.WriteLine("[SUBFSM] Poniendo ingrediente 0.");
-                break;
-            case 1:
-                Console.WriteLine("[SUBFSM] Poniendo ingrediente 1.");
-                break;
-            case 2:
-                Console.WriteLine("[SUBFSM] Poniendo ingrediente 2.");
-                break;
-        }
-        actualIngredient++;
-
-        if(actualIngredient == 3)
-        {
-            allToppings.Fire();
-            actualIngredient = 0;
-        }
-    }
 }

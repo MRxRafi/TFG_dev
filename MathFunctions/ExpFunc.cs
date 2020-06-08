@@ -25,4 +25,19 @@ public class ExpFunc: MathFunc
     {
         return (float) (Math.Pow(p.getValue() - c, k) + b);
     }
+
+    public void setK(float _k)
+    {
+        this.k = _k;
+    }
+
+    public void setC(float _c)
+    {
+        this.c = _c;
+    }
+
+    public void setB(float _b)
+    {
+        this.b = _b;
+    }
 }
