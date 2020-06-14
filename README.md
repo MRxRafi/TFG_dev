@@ -6,9 +6,9 @@ Ambas técnicas se pueden mezclar sin problema.
 
 **Objetivos**
 
-1. Eliminar dependencia Stateless (en proceso)
+~~1. Eliminar dependencia Stateless~~
 
-2. Incorporar Utility Curves
+2. Incorporar Utility Curves (en proceso)
 
 **Restricciones**
 
