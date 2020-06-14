@@ -8,7 +8,7 @@ public class UtilityAction
 
     public State utilityState;
     public bool HasSubmachine;
-    public MathFunc function;
+    public Factor factor;
     private Action utilityAction;
     private UtilityCurvesEngine uCurvesEngine;
 

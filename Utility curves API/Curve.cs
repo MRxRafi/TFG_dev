@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public abstract class MathFunc
+public abstract class Curve : Factor
 {
     #region variables
 
-    protected UtilityPerception p;
+    
 
     #endregion
 

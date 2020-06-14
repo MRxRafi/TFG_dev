@@ -5,16 +5,16 @@ using System.Collections.Generic;
 
 public class Testing
 {
-
-    private static UtilityCurvesEngine engine;
+    private static StateMachineEngine testMachine;
+    private static UtilityCurvesEngine utilEngine;
     private static Player p;
     private static Player p1;
-    private static UtilityPerception perception;
-    private static UtilityPerception perception2;
+    private static Perception tPerception;
+    private static Perception pPerception;
 
     static public void Main(String[] args)
     {
-        engine = new UtilityCurvesEngine();
+        utilEngine = new UtilityCurvesEngine(true);
 
         float[] f = new float[2];
         f[0] = 1.0f;
@@ -22,14 +22,11 @@ public class Testing
         p = new Player(2.0f, f);
         p1 = new Player(3.0f, f);
 
-        perception = new PlayerPerception(p);
-        perception2 = new PlayerPerception(p1);
 
-        ExpFunc func = new ExpFunc(perception, 2);
-        LinearFunc func2 = new LinearFunc(perception2, 1, 2);
+        utilEngine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), func);
+        utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), func2);
 
-        engine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), func);
-        engine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), func2);
+        CreateMainMachine();
 
         // Update tick emulation (e.g like Unity)
         // ELAPSED crea hilos 
@@ -37,7 +34,8 @@ public class Testing
         tmr.Interval = 100;
         tmr.AutoReset = false;
         tmr.Elapsed += (s, e) => {
-            engine.Update();
+            testMachine.Update();
+            utilEngine.Update();
             tmr.Enabled = true;
         };
         tmr.Enabled = true;
@@ -61,7 +59,7 @@ public class Testing
 
 
     }
-    /*
+    
     private static void CreateMainMachine()
     {
         testMachine = new StateMachineEngine(false);
@@ -73,14 +71,16 @@ public class Testing
 
         State st2 = testMachine.CreateState("test2", () => { Console.WriteLine("Se acaba de entrar al estado 2\n"); });
         State st3 = testMachine.CreateState("test3", () => { Console.WriteLine("Se acaba de entrar al estado 3\n"); });
-        State stSub = testMachine.CreateSubStateMachine("subMachine", subMachine);
+        State stSub = testMachine.CreateSubStateMachine("subMachine", utilEngine);
 
-        p = testMachine.CreatePerception<TimerPerception>(3);
+        tPerception = testMachine.CreatePerception<TimerPerception>(3);
 
-        testMachine.CreateTransition("e_st2", testMachine.GetEntryState(), p, st2);
-        testMachine.CreateTransition("e_st3", st2, p, st3);
-        testMachine.CreateTransition("e_sub", st3, p, stSub);
-        subMachine.CreateExitTransition("e_sub_exit", stSub, pQ, testMachine.GetEntryState());
+        testMachine.CreateTransition("e_st2", testMachine.GetEntryState(), tPerception, st2);
+        testMachine.CreateTransition("e_st3", st2, tPerception, st3);
+        testMachine.CreateTransition("e_sub", st3, tPerception, stSub);
+
+        pPerception = new KeyPerception(ConsoleKey.P, utilEngine);
+        utilEngine.CreateExitTransition("e_sub_exit", stSub, pPerception, testMachine.GetEntryState());
     }
-    */
+    
 }

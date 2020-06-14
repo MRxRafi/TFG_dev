@@ -56,6 +56,8 @@ public class UtilityCurvesEngine : BehaviourEngine
 
     public void Update()
     {
+        if (!Active) return;
+
         int actionsSize = this.actions.Count;
         List<float> utilities = new List<float>(actionsSize);
 
@@ -92,6 +94,7 @@ public class UtilityCurvesEngine : BehaviourEngine
         {
             action.Reset();
         }
+        this.ActiveAction = null;
     }
 
     #endregion

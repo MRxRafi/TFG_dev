@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class ExpFunc: MathFunc
+public class ExpFunc: Curve
 {
     #region variables
 

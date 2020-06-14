@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class LinearFunc : MathFunc
+public class LinearFunc : Curve
 {
     #region variables
 
