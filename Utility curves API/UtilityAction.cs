@@ -8,28 +8,33 @@ public class UtilityAction
 
     public State utilityState;
     public bool HasSubmachine;
-    public Factor factor;
+    private Factor factor;
     private Action utilityAction;
     private UtilityCurvesEngine uCurvesEngine;
 
     #endregion
 
-    public UtilityAction(string name, Action action, MathFunc func, UtilityCurvesEngine utilityCurvesEngine)
+    public UtilityAction(string name, Action action, Factor factor, UtilityCurvesEngine utilityCurvesEngine)
     {
         this.HasSubmachine = false;
         this.utilityAction = action;
-        this.function = func;
+        this.factor = factor;
         this.utilityState = new State(name, action, utilityCurvesEngine);
         this.uCurvesEngine = utilityCurvesEngine;
     }
 
-    public UtilityAction(string name, State utilState, MathFunc func, BehaviourEngine behaviourEngine)
+    public UtilityAction(string name, State utilState, Factor factor, BehaviourEngine behaviourEngine)
     {
         this.HasSubmachine = true;
         this.utilityState = utilState;
-        this.function = func;
+        this.factor = factor;
         this.uCurvesEngine = behaviourEngine as UtilityCurvesEngine;
 
+    }
+
+    public float getUtility()
+    {
+        return factor.getValue();
     }
 
     public void Update()

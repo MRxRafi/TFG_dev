@@ -11,18 +11,17 @@ public class LinearFunc : Curve
 
     #region constructors
 
-    public LinearFunc(UtilityPerception perception, float pend = 1, float ind = 0)
+    public LinearFunc(Factor f, float pend = 1, float ind = 0) : base(f)
     {
         this.m = pend;
         this.c = ind;
-        this.p = perception;
     }
 
     #endregion
 
-    public override float getImage()
+    public override float getValue()
     {
-        return (m*p.getValue() + c);
+        return m*factor.getValue() + c;
     }
 
     public void setM(float _m)

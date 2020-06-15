@@ -11,19 +11,19 @@ public class ExpFunc: Curve
 
     #region constructors
 
-    public ExpFunc(UtilityPerception perception, float exp = 1, float despX = 0, float despY = 0)
+    public ExpFunc(Factor f, float exp = 1, float despX = 0, float despY = 0) : base(f)
     {
         this.k = exp;
         this.c = despX;
         this.b = despY;
-        this.p = perception;
+        this.factor = f;
     }
 
     #endregion
 
-    public override float getImage()
+    public override float getValue()
     {
-        return (float) (Math.Pow(p.getValue() - c, k) + b);
+        return (float) (Math.Pow(factor.getValue() - c, k) + b);
     }
 
     public void setK(float _k)

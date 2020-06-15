@@ -5,13 +5,14 @@ public abstract class Fusion : Factor
 {
     #region variables
 
-    #endregion
-
-    #region constructors
-
+    protected List<Factor> factors;
+    
     #endregion
 
     #region methods
-
+    public Fusion(List<Factor> factors)
+    {
+        this.factors = factors;
+    }
     #endregion
 }

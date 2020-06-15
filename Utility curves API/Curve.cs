@@ -5,11 +5,12 @@ public abstract class Curve : Factor
 {
     #region variables
 
-    
+    protected Factor factor;
 
     #endregion
-
-    public virtual float getImage() {
-        return 0;
+    
+    public Curve(Factor f)
+    {
+        this.factor = f;
     }
 }

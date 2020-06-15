@@ -3,16 +3,9 @@ using System.Collections.Generic;
 
 public abstract class Factor
 {
-    #region variables
-
-    #endregion
-
-    #region constructors
-
-    #endregion
-
-    #region methods
-
-    #endregion
+    public virtual float getValue()
+    {
+        return 0;
+    }
 }
 

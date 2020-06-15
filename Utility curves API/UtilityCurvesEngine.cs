@@ -63,9 +63,10 @@ public class UtilityCurvesEngine : BehaviourEngine
 
         for (int i = 0; i < actionsSize; i++)
         {
-            utilities.Add(this.actions[i].function.getImage());
+            utilities.Add(this.actions[i].getUtility());
         }
 
+        // Si hay dos utilidades máximas iguales, se queda con la primera que encuentre
         int maxIndex = utilities.IndexOf(utilities.Max());
 
         if (ActiveAction != null)
@@ -78,7 +79,7 @@ public class UtilityCurvesEngine : BehaviourEngine
                 ExitTransition(this.actions[maxIndex]);
             }
 
-            ActiveAction.Update();
+            ActiveAction.Update(); //En caso de necesitarse
 
         } else if(actions.Count != 0)
         {
@@ -122,11 +123,11 @@ public class UtilityCurvesEngine : BehaviourEngine
     /// <param name="name">The name of the utility action</param>
     /// <param name="action">The action the utility action will execute</param>
     /// <returns></returns>
-    public UtilityAction CreateUtilityAction(string name, Action action, MathFunc func)
+    public UtilityAction CreateUtilityAction(string name, Action action, Factor factor)
     {
         if (!states.ContainsKey(name))
         {
-            UtilityAction uAction = new UtilityAction(name, action, func, this);
+            UtilityAction uAction = new UtilityAction(name, action, factor, this);
             actions.Add(uAction);
             states.Add(name, uAction.utilityState);
 
