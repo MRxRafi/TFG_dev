@@ -34,7 +34,10 @@ public class UtilityAction
 
     public float getUtility()
     {
-        return factor.getValue();
+        float utilityValue = factor.getValue();
+        if (utilityValue > 1.0f) return 1.0f;
+        if (utilityValue < 0.0f) return 0.0f;
+        return utilityValue;
     }
 
     public void Update()

@@ -8,7 +8,10 @@ public class LinearPartsCurve : Curve
     #endregion
 
     #region constructors
+    public LinearPartsCurve(Factor f) : base(f)
+    {
 
+    }
     #endregion
 
     #region methods

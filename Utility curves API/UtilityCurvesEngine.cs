@@ -10,6 +10,7 @@ public class UtilityCurvesEngine : BehaviourEngine
     public UtilityAction ActiveAction;
     public List<UtilityAction> actions;
 
+    private bool DEBUG = true;
     #endregion
 
     #region constructors
@@ -56,34 +57,27 @@ public class UtilityCurvesEngine : BehaviourEngine
 
     public void Update()
     {
-        if (!Active) return;
-
-        int actionsSize = this.actions.Count;
-        List<float> utilities = new List<float>(actionsSize);
-
-        for (int i = 0; i < actionsSize; i++)
+        // ¿Problema de la inercia?
+        if(actions.Count != 0)
         {
-            utilities.Add(this.actions[i].getUtility());
-        }
-
-        // Si hay dos utilidades máximas iguales, se queda con la primera que encuentre
-        int maxIndex = utilities.IndexOf(utilities.Max());
-
-        if (ActiveAction != null)
-        {
-            int activeActionIndex = this.actions.IndexOf(ActiveAction);
-
-            if (maxIndex != activeActionIndex)
+            if (ActiveAction != null)
             {
-                //Transicion a otra acción
+                if (!Active && !ActiveAction.HasSubmachine) return;
+                int maxIndex = getMaxUtilityIndex();
+                int activeActionIndex = this.actions.IndexOf(ActiveAction);
+
+                if (maxIndex != activeActionIndex)
+                {
+                    //Transicion a otra acción
+                    ExitTransition(this.actions[maxIndex]);
+                }
+
+                ActiveAction.Update(); //En caso de necesitarse
+
+            } else if(Active && ActiveAction == null) {
+                int maxIndex = getMaxUtilityIndex();
                 ExitTransition(this.actions[maxIndex]);
             }
-
-            ActiveAction.Update(); //En caso de necesitarse
-
-        } else if(actions.Count != 0)
-        {
-            ExitTransition(this.actions[maxIndex]);
         }
         
         
@@ -98,6 +92,20 @@ public class UtilityCurvesEngine : BehaviourEngine
         this.ActiveAction = null;
     }
 
+    private int getMaxUtilityIndex()
+    {
+        int actionsSize = this.actions.Count;
+        List<float> utilities = new List<float>(actionsSize);
+
+        for (int i = 0; i < actionsSize; i++)
+        {
+            utilities.Add(this.actions[i].getUtility());
+        }
+
+        // Si hay dos utilidades máximas iguales, se queda con la primera que encuentre
+        return utilities.IndexOf(utilities.Max());
+    }
+
     #endregion
 
     #region transitions
@@ -109,7 +117,7 @@ public class UtilityCurvesEngine : BehaviourEngine
                     .FireTransition();
 
         this.ActiveAction = action;
-        Console.WriteLine("[DEBUG] ExitTransition - New active action: " + action.utilityState.Name + 
+        if (DEBUG) Console.WriteLine("[DEBUG] ExitTransition - New active action: " + action.utilityState.Name + 
             ". Active State: " + this.actualState.Name + ". Last active action: " + last);
     }
 
