@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Testing
 {
-    private static StateMachineEngine testMachine;
+    private static BehaviourTreeEngine testMachine;
     private static UtilityCurvesEngine utilEngine;
     private static Player p;
     private static Player p1;
@@ -13,29 +13,23 @@ public class Testing
     private static Factor lifeVariable2;
     private static Factor linearFactor;
     private static Factor expFactor;
-    private static Perception tPerception;
-    private static Perception pPerception;
-    private static Perception isInPerception;
+    private static Factor lFactor;
+    private static UtilityAction u1, u2, uExit;
+    private static bool lPressed = false;
 
     static public void Main(String[] args)
     {
+        testMachine = new BehaviourTreeEngine(false);
         utilEngine = new UtilityCurvesEngine(true);
 
-        float[] f = new float[2];
-        f[0] = 1.0f;
-        f[1] = 1.0f;
+        float[] f = { 1.0f, 1.0f };
+
         p = new Player(2.0f, f);
         p1 = new Player(9.0f, f);
 
-        lifeVariable1 = new LeafVariable(() => { return p.life; }, 10.0f, 0.0f);
-        lifeVariable2 = new LeafVariable(() => { return p1.life; }, 10.0f, 0.0f);
-        linearFactor = new LinearFunc(lifeVariable1);
-        expFactor = new ExpFunc(lifeVariable2, 2);
-
-        UtilityAction u1 = utilEngine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), linearFactor);
-        UtilityAction u2 = utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), expFactor);
-
+        CreateSubmachine();
         CreateMainMachine();
+
 
         // Update tick emulation (e.g like Unity)
         // ELAPSED crea hilos 
@@ -67,6 +61,11 @@ public class Testing
                 Console.WriteLine("Vida de P: " + p.life);
                 Console.WriteLine("Utilidad de linear: " + u1.getUtility());
                 Console.WriteLine("Utilidad de exp: " + u2.getUtility());
+            } else if(k.Key == ConsoleKey.L)
+            {
+                if (lPressed) { lPressed = false; } else { lPressed = true; };
+                Console.WriteLine("Estado L: " + lPressed);
+                Console.WriteLine("Utilidad L: " + uExit.getUtility());
             }
         };
 
@@ -75,29 +74,35 @@ public class Testing
     
     private static void CreateMainMachine()
     {
-        testMachine = new StateMachineEngine(false);
+        SequenceNode sn = testMachine.CreateSequenceNode("root", false);
+        LoopDecoratorNode ldp = testMachine.CreateLoopNode("loop", sn);   
+        testMachine.SetRootNode(ldp);
 
-        testMachine.CreateEntryState("test", () => {
-            Console.WriteLine("Se acaba de entrar al estado de entrada" +
-                              " de la máquina principal.\n");
-        });
+        LeafNode n1 = testMachine.CreateLeafNode("test1", () => { Console.WriteLine("Se acaba de entrar al nodo 1\n"); }, () => ReturnValues.Succeed);
+        LeafNode n2 = testMachine.CreateLeafNode("test2", () => { Console.WriteLine("Se acaba de entrar al nodo 2\n"); }, () => ReturnValues.Succeed);
+        LeafNode nSub = testMachine.CreateSubBehaviour("sub", utilEngine);
 
-        State st2 = testMachine.CreateState("test2", () => { Console.WriteLine("Se acaba de entrar al estado 2\n"); });
-        State st3 = testMachine.CreateState("test3", () => { Console.WriteLine("Se acaba de entrar al estado 3\n"); });
-        State stSub = testMachine.CreateSubStateMachine("subMachine", utilEngine);
+        TimerDecoratorNode tdn = testMachine.CreateTimerNode("timer", n2, 2);
 
-        tPerception = testMachine.CreatePerception<TimerPerception>(3);
+        sn.AddChild(n1);
+        sn.AddChild(tdn);
+        sn.AddChild(nSub);  
+    }
 
-        testMachine.CreateTransition("e_st2", testMachine.GetEntryState(), tPerception, st2);
-        testMachine.CreateTransition("e_st3", st2, tPerception, st3);
-        testMachine.CreateTransition("e_sub", st3, tPerception, stSub);
+    private static void CreateSubmachine()
+    {
+        lifeVariable1 = new LeafVariable(() => { return p.life; }, 10.0f, 0.0f);
+        lifeVariable2 = new LeafVariable(() => { return p1.life; }, 10.0f, 0.0f);
+        linearFactor = new LinearFunc(lifeVariable1);
+        expFactor = new ExpFunc(lifeVariable2, 2);
+        lFactor = new LeafVariable(() => {
+            if (lPressed) return 1.0f;
+            return 0.0f;
+        }, 1.0f, 0.0f);
 
-        pPerception = new KeyPerception(ConsoleKey.P, utilEngine);
-        utilEngine.CreateExitTransition("e_sub_exit", stSub, pPerception, testMachine.GetEntryState());
-
-        isInPerception = new IsInStatePerception(utilEngine, "bolo2", testMachine);
-        utilEngine.CreateExitTransition("e_sub_exit2", stSub, isInPerception, st2);
-        
+        u1 = utilEngine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), linearFactor);
+        u2 = utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), expFactor);
+        uExit = utilEngine.CreateUtilityAction(lFactor, ReturnValues.Succeed, testMachine);
     }
     
 }

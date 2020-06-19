@@ -147,6 +147,24 @@ public class UtilityCurvesEngine : BehaviourEngine
         }
     }
 
+    //Crea una UtilityAction que sirve para salir de la máquina al nodo hoja contenedor del UtilitySystem
+    public UtilityAction CreateUtilityAction(Factor factor, ReturnValues valueReturned, BehaviourTreeEngine behaviourTreeEngine)
+    {
+        if (!states.ContainsKey("Exit_Action"))
+        {
+            UtilityAction uAction = new UtilityAction(factor, valueReturned, this, behaviourTreeEngine);
+            actions.Add(uAction);
+            states.Add("Exit_Action", uAction.utilityState);
+
+            return uAction;
+        }
+        else
+        {
+            throw new DuplicateWaitObjectException("Exit_Action", "The utility action already exists in the utility engine");
+        }
+    }
+
     #endregion
+
 }
 

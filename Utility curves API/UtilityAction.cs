@@ -9,20 +9,20 @@ public class UtilityAction
     public State utilityState;
     public bool HasSubmachine;
     private Factor factor;
-    private Action utilityAction;
     private UtilityCurvesEngine uCurvesEngine;
 
     #endregion
 
+    //Accion normal
     public UtilityAction(string name, Action action, Factor factor, UtilityCurvesEngine utilityCurvesEngine)
     {
         this.HasSubmachine = false;
-        this.utilityAction = action;
         this.factor = factor;
         this.utilityState = new State(name, action, utilityCurvesEngine);
         this.uCurvesEngine = utilityCurvesEngine;
     }
 
+    //Acción con submáquina
     public UtilityAction(string name, State utilState, Factor factor, BehaviourEngine behaviourEngine)
     {
         this.HasSubmachine = true;
@@ -30,6 +30,23 @@ public class UtilityAction
         this.factor = factor;
         this.uCurvesEngine = behaviourEngine as UtilityCurvesEngine;
 
+    }
+
+    
+    //Acción de salida para árboles de comportamiento (sale a nodo hoja)
+    public UtilityAction(Factor factor, ReturnValues valueReturned, UtilityCurvesEngine utilityCurvesEngine, BehaviourTreeEngine behaviourTreeEngine)
+    {
+        this.HasSubmachine = false;
+        
+        Action action = () =>
+        {
+            new Transition("Exit_Action_Transition", this.utilityState, new PushPerception(this.uCurvesEngine), this.uCurvesEngine.NodeToReturn,
+                            valueReturned, behaviourTreeEngine, this.uCurvesEngine)
+                            .FireTransition();
+        };
+        this.utilityState = new State("Exit_Action", action, utilityCurvesEngine);
+        this.factor = factor;
+        this.uCurvesEngine = utilityCurvesEngine;
     }
 
     public float getUtility()
@@ -50,5 +67,4 @@ public class UtilityAction
     {
 
     }
-
 }
