@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Testing
 {
-    private static BehaviourTreeEngine testMachine;
+    private static StateMachineEngine testMachine;
     private static UtilityCurvesEngine utilEngine;
     private static Player p;
     private static Player p1;
@@ -19,7 +19,7 @@ public class Testing
 
     static public void Main(String[] args)
     {
-        testMachine = new BehaviourTreeEngine(true);
+        testMachine = new StateMachineEngine(true);
         utilEngine = new UtilityCurvesEngine(false);
 
         float[] f = { 1.0f, 1.0f };
@@ -74,20 +74,17 @@ public class Testing
     
     private static void CreateSubmachine()
     {
-        SequenceNode sn = testMachine.CreateSequenceNode("root", false);
-        testMachine.SetRootNode(sn);
+        State st1 = testMachine.CreateEntryState("st1", () => Console.WriteLine("Se acaba de entrar al estado 1\n"));
+        State st2 = testMachine.CreateState("st2", () => Console.WriteLine("Se acaba de entrar al estado 2\n"));
+        State st3 = testMachine.CreateState("st3", () => Console.WriteLine("Se acaba de entrar al estado 3\n"));
 
-        LeafNode n1 = testMachine.CreateLeafNode("test1", () => { Console.WriteLine("Se acaba de entrar al nodo 1\n"); }, () => ReturnValues.Succeed);
-        LeafNode n2 = testMachine.CreateLeafNode("test2", () => { Console.WriteLine("Se acaba de entrar al nodo 2\n"); }, () => ReturnValues.Succeed);
+        TimerPerception tp1 = testMachine.CreatePerception<TimerPerception>(1.0f);
+        TimerPerception tp2 = testMachine.CreatePerception<TimerPerception>(2.0f);
+        TimerPerception tp3 = testMachine.CreatePerception<TimerPerception>(2.0f);
 
-        TimerDecoratorNode tdn = testMachine.CreateTimerNode("timer", n2, 2);
-
-        sn.AddChild(n1);
-        sn.AddChild(tdn);
-
-        //Crear transicion de salida
-        Perception status = new BehaviourTreeStatusPerception(testMachine, ReturnValues.Succeed, utilEngine);
-        testMachine.CreateExitTransition("Exit_Transition", sn.StateNode, status, utilEngine);
+        testMachine.CreateTransition("toSt2", st1, tp1, st2);
+        testMachine.CreateTransition("toSt3", st2, tp2, st3);
+        testMachine.CreateExitTransition("Exit_Transition", st3, tp3, utilEngine);
     }
 
     private static void CreateMainMachine()

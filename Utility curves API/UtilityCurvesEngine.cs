@@ -125,6 +125,7 @@ public class UtilityCurvesEngine : BehaviourEngine
         {
             if (ActiveAction.HasSubmachine)
             {
+                this.ActiveAction.subMachine.ResetPerceptionsActiveState();
                 new Transition("Max_Utility_Transition", this.ActiveAction.subMachine.actualState, new PushPerception(this),
                     this.GetEntryState(), this, this.ActiveAction.subMachine)
                     .FireTransition();

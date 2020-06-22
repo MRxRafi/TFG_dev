@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Hosting;
 
 public abstract class BehaviourEngine {
 
@@ -292,6 +293,19 @@ public abstract class BehaviourEngine {
     public virtual void Reset()
     {
         return;
+    }
+
+    /// <summary>
+    /// Resets the perceptions that are from the transitions of current state
+    /// </summary>
+    public void ResetPerceptionsActiveState()
+    {
+        foreach (Transition t in transitions.Values){
+            if(t.StateFrom == actualState)
+            {
+                t.Perception.Reset();
+            }
+        }
     }
 
     public StateConfigurator Configure(State st){
