@@ -185,6 +185,32 @@ public abstract class BehaviourEngine {
         }
     }
 
+    /// <summary>
+    /// Creates a new <see cref="Transition"/> that exits from any Behaviour Engine to a Utility Engine. ONLY exits to Utility Machines
+    /// </summary>
+    /// <param name="transitionName">The name of the transition</param>
+    /// <param name="stateFrom">The <see cref="State"/> where the transition comes from (only submachine's state)</param>
+    /// <param name="perception">The <see cref="Perception"/> that will trigger the transition</param>
+    /// <param name="superMachine">The <see cref="UtilityCurvesEngine"/> where the transition goes to (only entry super machine state)</param>
+    /// <returns></returns>
+    public Transition CreateExitTransition(string transitionName, State stateFrom, Perception perception, UtilityCurvesEngine superMachine)
+    {
+        if (!transitions.ContainsKey(transitionName))
+        {
+            State stateTo = superMachine.GetEntryState();
+            Transition exitTransition = new Transition(transitionName, stateFrom, perception, stateTo, superMachine, this);
+
+            // Transition managed by the sub-state machine
+            transitions.Add(transitionName, exitTransition);
+            
+            return exitTransition;
+        }
+        else
+        {
+            throw new DuplicateWaitObjectException(transitionName, "The transition already exists in the behaviour engine");
+        }
+    }
+
     #endregion create exit transitions
 
     #region other methods

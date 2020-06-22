@@ -14,13 +14,13 @@ public class Testing
     private static Factor linearFactor;
     private static Factor expFactor;
     private static Factor lFactor;
-    private static UtilityAction u1, u2, uExit;
+    private static UtilityAction u1, u2, uSub;
     private static bool lPressed = false;
 
     static public void Main(String[] args)
     {
-        testMachine = new BehaviourTreeEngine(false);
-        utilEngine = new UtilityCurvesEngine(true);
+        testMachine = new BehaviourTreeEngine(true);
+        utilEngine = new UtilityCurvesEngine(false);
 
         float[] f = { 1.0f, 1.0f };
 
@@ -65,31 +65,32 @@ public class Testing
             {
                 if (lPressed) { lPressed = false; } else { lPressed = true; };
                 Console.WriteLine("Estado L: " + lPressed);
-                Console.WriteLine("Utilidad L: " + uExit.getUtility());
+                Console.WriteLine("Utilidad L: " + uSub.getUtility());
             }
         };
 
 
     }
     
-    private static void CreateMainMachine()
+    private static void CreateSubmachine()
     {
         SequenceNode sn = testMachine.CreateSequenceNode("root", false);
-        LoopDecoratorNode ldp = testMachine.CreateLoopNode("loop", sn);   
-        testMachine.SetRootNode(ldp);
+        testMachine.SetRootNode(sn);
 
         LeafNode n1 = testMachine.CreateLeafNode("test1", () => { Console.WriteLine("Se acaba de entrar al nodo 1\n"); }, () => ReturnValues.Succeed);
         LeafNode n2 = testMachine.CreateLeafNode("test2", () => { Console.WriteLine("Se acaba de entrar al nodo 2\n"); }, () => ReturnValues.Succeed);
-        LeafNode nSub = testMachine.CreateSubBehaviour("sub", utilEngine);
 
         TimerDecoratorNode tdn = testMachine.CreateTimerNode("timer", n2, 2);
 
         sn.AddChild(n1);
         sn.AddChild(tdn);
-        sn.AddChild(nSub);  
+
+        //Crear transicion de salida
+        Perception status = new BehaviourTreeStatusPerception(testMachine, ReturnValues.Succeed, utilEngine);
+        testMachine.CreateExitTransition("Exit_Transition", sn.StateNode, status, utilEngine);
     }
 
-    private static void CreateSubmachine()
+    private static void CreateMainMachine()
     {
         lifeVariable1 = new LeafVariable(() => { return p.life; }, 10.0f, 0.0f);
         lifeVariable2 = new LeafVariable(() => { return p1.life; }, 10.0f, 0.0f);
@@ -102,7 +103,7 @@ public class Testing
 
         u1 = utilEngine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), linearFactor);
         u2 = utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), expFactor);
-        uExit = utilEngine.CreateUtilityAction(lFactor, ReturnValues.Succeed, testMachine);
+        uSub = utilEngine.CreateSubBehaviour("subMachine", lFactor, testMachine);
     }
     
 }

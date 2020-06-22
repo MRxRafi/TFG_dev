@@ -8,6 +8,7 @@ public class UtilityAction
 
     public State utilityState;
     public bool HasSubmachine;
+    public BehaviourEngine subMachine;
     private Factor factor;
     private UtilityCurvesEngine uCurvesEngine;
 
@@ -23,13 +24,13 @@ public class UtilityAction
     }
 
     //Acción con submáquina
-    public UtilityAction(string name, State utilState, Factor factor, BehaviourEngine behaviourEngine)
+    public UtilityAction(State utilState, Factor factor, BehaviourEngine behaviourEngine, BehaviourEngine subMachine)
     {
         this.HasSubmachine = true;
         this.utilityState = utilState;
         this.factor = factor;
         this.uCurvesEngine = behaviourEngine as UtilityCurvesEngine;
-
+        this.subMachine = subMachine;
     }
 
     

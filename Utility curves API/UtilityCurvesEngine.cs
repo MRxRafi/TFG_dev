@@ -57,18 +57,25 @@ public class UtilityCurvesEngine : BehaviourEngine
 
     public void Update()
     {
-        // ¿Problema de la inercia?
+        // TODO: ¿Problema de la inercia?
         if(actions.Count != 0)
         {
             if (ActiveAction != null)
             {
                 if (!Active && !ActiveAction.HasSubmachine) return;
+
+                // Para evitar problemas, si el estado actual es distinto a la acción, se realiza
+                // un reseteo de la máquina. Esto ocurre al volver de un BT
+                if (ActiveAction.utilityState != this.actualState)
+                {
+                    this.Reset();
+                }
+
                 int maxIndex = getMaxUtilityIndex();
                 int activeActionIndex = this.actions.IndexOf(ActiveAction);
 
                 if (maxIndex != activeActionIndex)
                 {
-                    //Transicion a otra acción
                     ExitTransition(this.actions[maxIndex]);
                 }
 
@@ -110,11 +117,27 @@ public class UtilityCurvesEngine : BehaviourEngine
 
     #region transitions
 
+    // Exits from the actual utilityAction to go to another one
     public void ExitTransition(UtilityAction action)
     {
         string last = this.actualState.Name;
-        new Transition("Max_Utility_Transition", this.actualState, new PushPerception(this), action.utilityState, this)
+        if (ActiveAction != null)
+        {
+            if (ActiveAction.HasSubmachine)
+            {
+                new Transition("Max_Utility_Transition", this.ActiveAction.subMachine.actualState, new PushPerception(this),
+                    this.GetEntryState(), this, this.ActiveAction.subMachine)
                     .FireTransition();
+            } else
+            {
+                new Transition("Max_Utility_Transition", this.actualState, new PushPerception(this), action.utilityState, this)
+                    .FireTransition();
+            }
+        } else
+        {
+            new Transition("Max_Utility_Transition", this.actualState, new PushPerception(this), action.utilityState, this)
+                    .FireTransition();
+        }
 
         this.ActiveAction = action;
         if (DEBUG) Console.WriteLine("[DEBUG] ExitTransition - New active action: " + action.utilityState.Name + 
@@ -165,6 +188,57 @@ public class UtilityCurvesEngine : BehaviourEngine
     }
 
     #endregion
+
+    #region create sub-state machines
+
+    /// <summary>
+    /// Adds a type of <see cref="UtilityAction"/> with a sub-behaviour engine in it and its transition to the entry state
+    /// </summary>
+    /// <param name="actionName">The name of the action</param>
+    /// <param name="factor">The factor that gives the utility value to the action</param>
+    /// <param name="subBehaviourEngine">The sub-behaviour tree inside the </param>
+    public UtilityAction CreateSubBehaviour(string actionName, Factor factor, BehaviourEngine subBehaviourEngine)
+    {
+        if (!states.ContainsKey(actionName))
+        {
+            State stateTo = subBehaviourEngine.GetEntryState();
+            State state = new State(actionName, subBehaviourEngine.GetState("Entry_Machine"), stateTo, subBehaviourEngine, this);
+            UtilityAction utilAction = new UtilityAction(state, factor, this, subBehaviourEngine);
+            states.Add(utilAction.utilityState.Name, utilAction.utilityState);
+            actions.Add(utilAction);
+
+            return utilAction;
+        } else
+        {
+            throw new DuplicateWaitObjectException(actionName, "The utility action already exists in the utility engine");
+        }  
+    }
+
+    /// <summary>
+    /// Adds a type of <see cref="UtilityAction"/> with a sub-behaviour engine in it and its transition to the entry state
+    /// </summary>
+    /// <param name="actionName">The name of the action</param>
+    /// <param name="factor">The factor that gives the utility value to the action</param>
+    /// <param name="subBehaviourEngine">The sub-behaviour tree inside the </param>
+    /// <param name="stateTo">The name of the state where the sub-state machine will enter</param>
+    public UtilityAction CreateSubBehaviour(string actionName, Factor factor, BehaviourEngine subBehaviourEngine, State stateTo)
+    {
+        if (!states.ContainsKey(actionName))
+        {
+            State state = new State(actionName, subBehaviourEngine.GetState("Entry_Machine"), stateTo, subBehaviourEngine, this);
+            UtilityAction utilAction = new UtilityAction(state, factor, this, subBehaviourEngine);
+            states.Add(utilAction.utilityState.Name, utilAction.utilityState);
+            actions.Add(utilAction);
+
+            return utilAction;
+        }
+        else
+        {
+            throw new DuplicateWaitObjectException(actionName, "The utility action already exists in the utility engine");
+        }
+    }
+
+    #endregion create sub-state machines
 
 }
 
