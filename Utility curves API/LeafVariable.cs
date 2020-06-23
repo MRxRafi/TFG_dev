@@ -31,7 +31,10 @@ public class LeafVariable : Factor
 
     public override float getValue()
     {
-        return (getFactor() - minValue) / (maxValue - minValue);
+        float factor = (getFactor() - minValue) / (maxValue - minValue);
+        if (factor < 0) factor = 0; if (factor > 1) factor = 1;
+
+        return factor;
     }
 
     #endregion

@@ -12,7 +12,7 @@ public class Testing
     private static Factor lifeVariable1;
     private static Factor lifeVariable2;
     private static Factor linearFactor;
-    private static Factor expFactor;
+    private static Factor weightFactor;
     private static Factor lFactor;
     private static UtilityAction u1, u2, uSub;
     private static bool lPressed = false;
@@ -91,15 +91,31 @@ public class Testing
     {
         lifeVariable1 = new LeafVariable(() => { return p.life; }, 10.0f, 0.0f);
         lifeVariable2 = new LeafVariable(() => { return p1.life; }, 10.0f, 0.0f);
-        linearFactor = new LinearFunc(lifeVariable1);
-        expFactor = new ExpFunc(lifeVariable2, 2);
+
+        //Linear by parts
+        List<Point2D> points = new List<Point2D>();
+        points.Add(new Point2D(0, 0));
+        points.Add(new Point2D(0.2f, 0.4f));
+        points.Add(new Point2D(0.6f, 0.8f));
+        points.Add(new Point2D(1, 1));
+        linearFactor = new LinearPartsCurve(lifeVariable1, points);
+
+        // Weight Factor
+        List<Factor> factors = new List<Factor>();
+        List<float> weights = new List<float>();
+        factors.Add(lifeVariable1);
+        factors.Add(lifeVariable2);
+        weights.Add(0.3f);
+        weights.Add(0.7f);
+
+        weightFactor = new WeightedSumFusion(factors, weights);
         lFactor = new LeafVariable(() => {
             if (lPressed) return 1.0f;
             return 0.0f;
         }, 1.0f, 0.0f);
 
         u1 = utilEngine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), linearFactor);
-        u2 = utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), expFactor);
+        u2 = utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), weightFactor);
         uSub = utilEngine.CreateSubBehaviour("subMachine", lFactor, testMachine);
     }
     
