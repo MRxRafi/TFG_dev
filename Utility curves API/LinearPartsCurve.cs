@@ -10,12 +10,7 @@ public class LinearPartsCurve : Curve
     #region constructors
     public LinearPartsCurve(Factor f, List<Point2D> points) : base(f)
     {
-        this.points = points;
-
-        this.points.Sort((p1, p2) =>
-        {
-            return p1.x.CompareTo(p2.x);
-        });
+        this.setPoints(points);
     }
     #endregion
 

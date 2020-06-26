@@ -6,20 +6,22 @@ using System.Collections.Generic;
 public class Testing
 {
     private static StateMachineEngine testMachine;
+    private static BehaviourTreeEngine BTMachine;
     private static UtilityCurvesEngine utilEngine;
     private static Player p;
     private static Player p1;
     private static Factor lifeVariable1;
     private static Factor lifeVariable2;
+    private static Factor maxFusionFactor;
+    private static Factor expFactor1, expFactor2;
     private static Factor linearFactor;
     private static Factor weightFactor;
-    private static Factor lFactor;
-    private static UtilityAction u1, u2, uSub;
-    private static bool lPressed = false;
+    private static UtilityAction u1, u2, uSub1, uSub2;
 
     static public void Main(String[] args)
     {
         testMachine = new StateMachineEngine(true);
+        BTMachine = new BehaviourTreeEngine(true);
         utilEngine = new UtilityCurvesEngine(false);
 
         float[] f = { 1.0f, 1.0f };
@@ -28,6 +30,7 @@ public class Testing
         p1 = new Player(9.0f, f);
 
         CreateSubmachine();
+        CreateSubmachine2();
         CreateMainMachine();
 
 
@@ -38,6 +41,7 @@ public class Testing
         tmr.AutoReset = false;
         tmr.Elapsed += (s, e) => {
             testMachine.Update();
+            BTMachine.Update();
             utilEngine.Update();
             tmr.Enabled = true;
         };
@@ -53,19 +57,14 @@ public class Testing
             {
                 p.life += 1.0f;
                 Console.WriteLine("Vida de P: " + p.life);
-                Console.WriteLine("Utilidad de linear: " + u1.getUtility());
-                Console.WriteLine("Utilidad de exp: " + u2.getUtility());
+                //Console.WriteLine("Utilidad de linear: " + u1.getUtility());
+                //Console.WriteLine("Utilidad de exp: " + u2.getUtility());
             } else if (k.Key == ConsoleKey.DownArrow)
             {
                 p.life -= 1.0f;
                 Console.WriteLine("Vida de P: " + p.life);
-                Console.WriteLine("Utilidad de linear: " + u1.getUtility());
-                Console.WriteLine("Utilidad de exp: " + u2.getUtility());
-            } else if(k.Key == ConsoleKey.L)
-            {
-                if (lPressed) { lPressed = false; } else { lPressed = true; };
-                Console.WriteLine("Estado L: " + lPressed);
-                Console.WriteLine("Utilidad L: " + uSub.getUtility());
+                //Console.WriteLine("Utilidad de linear: " + u1.getUtility());
+                //Console.WriteLine("Utilidad de exp: " + u2.getUtility());
             }
         };
 
@@ -87,12 +86,43 @@ public class Testing
         testMachine.CreateExitTransition("Exit_Transition", st3, tp3, utilEngine);
     }
 
+    private static void CreateSubmachine2()
+    {
+        SequenceNode root = BTMachine.CreateSequenceNode("root", false);
+        BTMachine.SetRootNode(root);
+
+        Action a1 = new Action(() => {
+            p1.modifyLife();
+            Console.WriteLine("[BT_MACHINE] Vida p1 modificada: " + p1.life);
+            Console.WriteLine("--------------------------------");
+        });
+        LeafNode lf1 = BTMachine.CreateLeafNode("leaf1", a1, () => ReturnValues.Succeed);
+
+        LeafNode lf2 = BTMachine.CreateLeafNode("leaf2", () => Console.WriteLine("[BT_MACHINE]--------------------------------"), () => ReturnValues.Succeed);
+        TimerDecoratorNode tdn = BTMachine.CreateTimerNode("timer", lf2, 2);
+
+        root.AddChild(lf1);
+        root.AddChild(tdn);
+
+        BTMachine.CreateExitTransition("Exit_Transition", root.StateNode,
+            new BehaviourTreeStatusPerception(BTMachine, ReturnValues.Succeed, utilEngine), utilEngine);
+    }
+
     private static void CreateMainMachine()
     {
+        //FACTORS
+        // Leafs
         lifeVariable1 = new LeafVariable(() => { return p.life; }, 10.0f, 0.0f);
         lifeVariable2 = new LeafVariable(() => { return p1.life; }, 10.0f, 0.0f);
 
-        //Linear by parts
+        List<Factor> lifeFactors = new List<Factor>();
+        lifeFactors.Add(lifeVariable1);
+        lifeFactors.Add(lifeVariable2);
+
+        // Min Fusion
+        maxFusionFactor = new MaxFusion(lifeFactors);
+
+        // Linear by parts
         List<Point2D> points = new List<Point2D>();
         points.Add(new Point2D(0, 0));
         points.Add(new Point2D(0.2f, 0.4f));
@@ -100,23 +130,35 @@ public class Testing
         points.Add(new Point2D(1, 1));
         linearFactor = new LinearPartsCurve(lifeVariable1, points);
 
+        // Exponential Factors
+        expFactor1 = new ExpFunc(linearFactor, 0.6f);
+        expFactor2 = new ExpFunc(lifeVariable2, 0.7f);
+
         // Weight Factor
-        List<Factor> factors = new List<Factor>();
-        List<float> weights = new List<float>();
-        factors.Add(lifeVariable1);
-        factors.Add(lifeVariable2);
-        weights.Add(0.3f);
-        weights.Add(0.7f);
+        List<Factor> wFactors = new List<Factor>();
+        wFactors.Add(expFactor1);
+        wFactors.Add(maxFusionFactor);
+        weightFactor = new WeightedSumFusion(wFactors);
 
-        weightFactor = new WeightedSumFusion(factors, weights);
-        lFactor = new LeafVariable(() => {
-            if (lPressed) return 1.0f;
-            return 0.0f;
-        }, 1.0f, 0.0f);
+        //ACTIONS
 
-        u1 = utilEngine.CreateUtilityAction("bolo", () => Console.WriteLine("Se ha entrado en bolo"), linearFactor);
-        u2 = utilEngine.CreateUtilityAction("bolo2", () => Console.WriteLine("Se ha entrado en bolo2"), weightFactor);
-        uSub = utilEngine.CreateSubBehaviour("subMachine", lFactor, testMachine);
+        //Basic actions
+        Action a1 = new Action(() => {
+            p1.modifyLife();
+            Console.WriteLine("[BASICO1] Vida p1 modificada: " + p1.life);
+            Console.WriteLine("--------------------------------");
+        });
+        Action a2 = new Action(() => {
+            p.modifyLife();
+            Console.WriteLine("[BASICO2] Vida p modificada: " + p.life);
+            Console.WriteLine("--------------------------------");
+        });
+
+        //Utility Actions
+        u1 = utilEngine.CreateUtilityAction("basico1", a1, maxFusionFactor);
+        u2 = utilEngine.CreateUtilityAction("basico2", a2, linearFactor);
+        uSub1 = utilEngine.CreateSubBehaviour("subMachine1", weightFactor, testMachine);
+        uSub2 = utilEngine.CreateSubBehaviour("subMachine2", expFactor2, BTMachine);
     }
     
 }

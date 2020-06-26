@@ -141,8 +141,22 @@ public class UtilityCurvesEngine : BehaviourEngine
         }
 
         this.ActiveAction = action;
-        if (DEBUG) Console.WriteLine("[DEBUG] ExitTransition - New active action: " + action.utilityState.Name + 
+        if (DEBUG)
+        {
+            //EXIT TRANSITION
+            Console.WriteLine("[DEBUG] ExitTransition - New active action: " + action.utilityState.Name +
             ". Active State: " + this.actualState.Name + ". Last active action: " + last);
+            Console.WriteLine("-------------------------");
+
+            //UTILITIES
+            Console.WriteLine("[DEBUG] Utilities: ");
+            foreach(UtilityAction a in this.actions)
+            {
+                Console.WriteLine(a.utilityState.Name + " utility " + a.getUtility());
+            }
+            Console.WriteLine("[DEBUG] FINISHED UTILITIES DEBUG");
+            Console.WriteLine("--------------------------------");
+        }
     }
 
     #endregion
