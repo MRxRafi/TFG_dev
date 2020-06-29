@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class UtilityCurvesEngine : BehaviourEngine
+public class UtilitySystemEngine : BehaviourEngine
 {
     #region variables
 
@@ -19,7 +19,7 @@ public class UtilityCurvesEngine : BehaviourEngine
     /// Creates a UtilityCurvesEngine that CANNOT be a submachine
     /// </summary>
     /// <param name="isSubmachine"></param>
-    public UtilityCurvesEngine()
+    public UtilitySystemEngine()
     {
         base.transitions = new Dictionary<string, Transition>();
         base.states = new Dictionary<string, State>();
@@ -37,7 +37,7 @@ public class UtilityCurvesEngine : BehaviourEngine
     /// Creates a UtilityCurvesEngine
     /// </summary>
     /// <param name="isSubmachine">Is this a submachine?</param>
-    public UtilityCurvesEngine(bool isSubmachine)
+    public UtilitySystemEngine(bool isSubmachine)
     {
         base.transitions = new Dictionary<string, Transition>();
         base.states = new Dictionary<string, State>();
@@ -78,12 +78,11 @@ public class UtilityCurvesEngine : BehaviourEngine
                 {
                     ExitTransition(this.actions[maxIndex]);
                 }
-
                 ActiveAction.Update(); //En caso de necesitarse
-
             } else if(Active && ActiveAction == null) {
                 int maxIndex = getMaxUtilityIndex();
                 ExitTransition(this.actions[maxIndex]);
+                ActiveAction.Update(); //En caso de necesitarse
             }
         }
         
@@ -92,10 +91,12 @@ public class UtilityCurvesEngine : BehaviourEngine
 
     public override void Reset()
     {
+        /*
         foreach (UtilityAction action in actions)
         {
             action.Reset();
         }
+        */
         this.ActiveAction = null;
     }
 
@@ -186,19 +187,36 @@ public class UtilityCurvesEngine : BehaviourEngine
     }
 
     //Crea una UtilityAction que sirve para salir de la máquina al nodo hoja contenedor del UtilitySystem
-    public UtilityAction CreateUtilityAction(Factor factor, ReturnValues valueReturned, BehaviourTreeEngine behaviourTreeEngine)
+    public UtilityAction CreateUtilityAction(string name, Factor factor, ReturnValues valueReturned, BehaviourTreeEngine behaviourTreeEngine)
     {
-        if (!states.ContainsKey("Exit_Action"))
+        if (!states.ContainsKey(name))
         {
-            UtilityAction uAction = new UtilityAction(factor, valueReturned, this, behaviourTreeEngine);
+            UtilityAction uAction = new UtilityAction(name, factor, valueReturned, this, behaviourTreeEngine);
             actions.Add(uAction);
-            states.Add("Exit_Action", uAction.utilityState);
+            states.Add(name, uAction.utilityState);
 
             return uAction;
         }
         else
         {
-            throw new DuplicateWaitObjectException("Exit_Action", "The utility action already exists in the utility engine");
+            throw new DuplicateWaitObjectException(name, "The utility action already exists in the utility engine");
+        }
+    }
+
+    //Crea una UtilityAction que sirve para salir de la máquina al nodo hoja contenedor del UtilitySystem, con un método a ejecutar asociado
+    public UtilityAction CreateUtilityAction(string name, Factor factor, Action ac, Func<ReturnValues> valueReturned, BehaviourTreeEngine behaviourTreeEngine)
+    {
+        if (!states.ContainsKey(name))
+        {
+            UtilityAction uAction = new UtilityAction(name, factor, ac, valueReturned, this, behaviourTreeEngine);
+            actions.Add(uAction);
+            states.Add(name, uAction.utilityState);
+
+            return uAction;
+        }
+        else
+        {
+            throw new DuplicateWaitObjectException(name, "The utility action already exists in the utility engine");
         }
     }
 

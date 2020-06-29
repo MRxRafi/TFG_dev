@@ -192,9 +192,9 @@ public abstract class BehaviourEngine {
     /// <param name="transitionName">The name of the transition</param>
     /// <param name="stateFrom">The <see cref="State"/> where the transition comes from (only submachine's state)</param>
     /// <param name="perception">The <see cref="Perception"/> that will trigger the transition</param>
-    /// <param name="superMachine">The <see cref="UtilityCurvesEngine"/> where the transition goes to (only entry super machine state)</param>
+    /// <param name="superMachine">The <see cref="UtilitySystemEngine"/> where the transition goes to (only entry super machine state)</param>
     /// <returns></returns>
-    public Transition CreateExitTransition(string transitionName, State stateFrom, Perception perception, UtilityCurvesEngine superMachine)
+    public Transition CreateExitTransition(string transitionName, State stateFrom, Perception perception, UtilitySystemEngine superMachine)
     {
         if (!transitions.ContainsKey(transitionName))
         {

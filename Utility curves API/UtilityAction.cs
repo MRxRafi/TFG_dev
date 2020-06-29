@@ -10,12 +10,15 @@ public class UtilityAction
     public bool HasSubmachine;
     public BehaviourEngine subMachine;
     private Factor factor;
-    private UtilityCurvesEngine uCurvesEngine;
+    private UtilitySystemEngine uCurvesEngine;
+
+    private Func<ReturnValues> valueReturned;
+    private BehaviourTreeEngine bt;
 
     #endregion
 
     //Accion normal
-    public UtilityAction(string name, Action action, Factor factor, UtilityCurvesEngine utilityCurvesEngine)
+    public UtilityAction(string name, Action action, Factor factor, UtilitySystemEngine utilityCurvesEngine)
     {
         this.HasSubmachine = false;
         this.factor = factor;
@@ -29,13 +32,13 @@ public class UtilityAction
         this.HasSubmachine = true;
         this.utilityState = utilState;
         this.factor = factor;
-        this.uCurvesEngine = behaviourEngine as UtilityCurvesEngine;
+        this.uCurvesEngine = behaviourEngine as UtilitySystemEngine;
         this.subMachine = subMachine;
     }
 
     
-    //Acción de salida para árboles de comportamiento (sale a nodo hoja)
-    public UtilityAction(Factor factor, ReturnValues valueReturned, UtilityCurvesEngine utilityCurvesEngine, BehaviourTreeEngine behaviourTreeEngine)
+    //Acción de salida para árboles de comportamiento (sale a nodo hoja instantáneamente)
+    public UtilityAction(string name, Factor factor, ReturnValues valueReturned, UtilitySystemEngine utilityCurvesEngine, BehaviourTreeEngine behaviourTreeEngine)
     {
         this.HasSubmachine = false;
         
@@ -45,9 +48,20 @@ public class UtilityAction
                             valueReturned, behaviourTreeEngine, this.uCurvesEngine)
                             .FireTransition();
         };
-        this.utilityState = new State("Exit_Action", action, utilityCurvesEngine);
+        this.utilityState = new State(name, action, utilityCurvesEngine);
         this.factor = factor;
         this.uCurvesEngine = utilityCurvesEngine;
+    }
+
+    //Acción de salida para árboles de comportamiento (sale a nodo hoja) con una acción a ejecutar y esperando a que el valor devuelto sea diferente de Running
+    public UtilityAction(string name, Factor factor, Action ac, Func<ReturnValues> valueReturned, UtilitySystemEngine utilityCurvesEngine, BehaviourTreeEngine behaviourTreeEngine)
+    {
+        this.HasSubmachine = false;
+        this.utilityState = new State(name, ac, utilityCurvesEngine);
+        this.factor = factor;
+        this.uCurvesEngine = utilityCurvesEngine;
+        this.valueReturned = valueReturned;
+        this.bt = behaviourTreeEngine;
     }
 
     public float getUtility()
@@ -60,8 +74,18 @@ public class UtilityAction
 
     public void Update()
     {
-        //Action
-        //Console.WriteLine("Estado " + utilityState.Name + " está siendo actualizado.");
+        // Valor devuelto al árbol de comportamientos, una vez devuelva un valor distinto de Running
+        if(this.valueReturned != null)
+        {
+            ReturnValues returnValue = this.valueReturned();
+            if (returnValue != ReturnValues.Running)
+            {
+                new Transition("Exit_Action_Transition", this.utilityState, new PushPerception(this.uCurvesEngine), this.uCurvesEngine.NodeToReturn,
+                                returnValue, this.bt, this.uCurvesEngine)
+                                .FireTransition();
+            }
+        }
+        
     }
 
     public void Reset()

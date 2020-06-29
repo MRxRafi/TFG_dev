@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class LinearFunc : Curve
+public class LinearCurve : Curve
 {
     #region variables
 
@@ -11,7 +11,7 @@ public class LinearFunc : Curve
 
     #region constructors
 
-    public LinearFunc(Factor f, float pend = 1, float ind = 0) : base(f)
+    public LinearCurve(Factor f, float pend = 1, float ind = 0) : base(f)
     {
         this.m = pend;
         this.c = ind;

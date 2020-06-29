@@ -7,7 +7,7 @@ public class Testing
 {
     private static StateMachineEngine testMachine;
     private static BehaviourTreeEngine BTMachine;
-    private static UtilityCurvesEngine utilEngine;
+    private static UtilitySystemEngine utilEngine;
     private static Player p;
     private static Player p1;
     private static Factor lifeVariable1;
@@ -22,7 +22,7 @@ public class Testing
     {
         testMachine = new StateMachineEngine(true);
         BTMachine = new BehaviourTreeEngine(true);
-        utilEngine = new UtilityCurvesEngine(false);
+        utilEngine = new UtilitySystemEngine(false);
 
         float[] f = { 1.0f, 1.0f };
 
@@ -131,8 +131,8 @@ public class Testing
         linearFactor = new LinearPartsCurve(lifeVariable1, points);
 
         // Exponential Factors
-        expFactor1 = new ExpFunc(linearFactor, 0.6f);
-        expFactor2 = new ExpFunc(lifeVariable2, 0.7f);
+        expFactor1 = new ExpCurve(linearFactor, 0.6f);
+        expFactor2 = new ExpCurve(lifeVariable2, 0.7f);
 
         // Weight Factor
         List<Factor> wFactors = new List<Factor>();
