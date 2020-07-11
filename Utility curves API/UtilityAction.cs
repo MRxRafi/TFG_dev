@@ -27,12 +27,12 @@ public class UtilityAction
     }
 
     //Acción con submáquina
-    public UtilityAction(State utilState, Factor factor, BehaviourEngine behaviourEngine, BehaviourEngine subMachine)
+    public UtilityAction(State utilState, Factor factor, UtilitySystemEngine uSystemEngine, BehaviourEngine subMachine)
     {
         this.HasSubmachine = true;
         this.utilityState = utilState;
         this.factor = factor;
-        this.uCurvesEngine = behaviourEngine as UtilitySystemEngine;
+        this.uCurvesEngine = uSystemEngine;
         this.subMachine = subMachine;
     }
 

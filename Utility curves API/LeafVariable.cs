@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 
 public class LeafVariable : Factor
 {
     #region variables
 
     private float maxValue, minValue;
-    private Func<float> getFactor;
 
+    private Func<float> getVariable;
     #endregion
 
     #region constructors
@@ -20,7 +19,7 @@ public class LeafVariable : Factor
     /// <param name="minValue">The minimum value that the variable can reach</param>
     public LeafVariable(Func<float> getVariable, float maxValue, float minValue)
     {
-        this.getFactor = getVariable;
+        this.getVariable = getVariable;
         this.maxValue = maxValue;
         this.minValue = minValue;
     }
@@ -31,7 +30,7 @@ public class LeafVariable : Factor
 
     public override float getValue()
     {
-        float factor = (getFactor() - minValue) / (maxValue - minValue);
+        float factor = (getVariable() - minValue) / (maxValue - minValue);
         if (factor < 0) factor = 0; if (factor > 1) factor = 1;
 
         return factor;

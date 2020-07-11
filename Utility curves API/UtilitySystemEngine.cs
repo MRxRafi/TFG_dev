@@ -10,6 +10,7 @@ public class UtilitySystemEngine : BehaviourEngine
     public UtilityAction ActiveAction;
     public List<UtilityAction> actions;
 
+    private float inertia;
     private bool DEBUG = true;
     #endregion
 
@@ -18,8 +19,9 @@ public class UtilitySystemEngine : BehaviourEngine
     /// <summary>
     /// Creates a UtilityCurvesEngine that CANNOT be a submachine
     /// </summary>
-    /// <param name="isSubmachine"></param>
-    public UtilitySystemEngine()
+    /// <param name="inertia">Value provided to avoid inertia problem when switching between actions.
+    /// Recommended value: between 1.2 and 1.3</param>
+    public UtilitySystemEngine(float inertia = 1.3f)
     {
         base.transitions = new Dictionary<string, Transition>();
         base.states = new Dictionary<string, State>();
@@ -30,6 +32,8 @@ public class UtilitySystemEngine : BehaviourEngine
         this.actualState = entryState;
         states.Add(entryState.Name, entryState);
 
+        this.inertia = inertia;
+
         Active = true;
     }
 
@@ -37,7 +41,9 @@ public class UtilitySystemEngine : BehaviourEngine
     /// Creates a UtilityCurvesEngine
     /// </summary>
     /// <param name="isSubmachine">Is this a submachine?</param>
-    public UtilitySystemEngine(bool isSubmachine)
+    /// <param name="inertia">Value provided to avoid inertia problem when switching between actions.
+    /// Recommended value: between 1.2 and 1.3</param>
+    public UtilitySystemEngine(bool isSubmachine, float inertia = 1.3f)
     {
         base.transitions = new Dictionary<string, Transition>();
         base.states = new Dictionary<string, State>();
@@ -48,6 +54,8 @@ public class UtilitySystemEngine : BehaviourEngine
         this.actualState = entryState;
         states.Add(entryState.Name, entryState);
 
+        this.inertia = inertia;
+
         Active = (isSubmachine) ? false : true;
     }
 
@@ -57,7 +65,6 @@ public class UtilitySystemEngine : BehaviourEngine
 
     public void Update()
     {
-        // TODO: ¿Problema de la inercia?
         if(actions.Count != 0)
         {
             if (ActiveAction != null)
@@ -107,7 +114,17 @@ public class UtilitySystemEngine : BehaviourEngine
 
         for (int i = 0; i < actionsSize; i++)
         {
-            utilities.Add(this.actions[i].getUtility());
+            if(this.actions[i] == ActiveAction)
+            {
+                // INERCIA + 30% peso
+                if (this.actions[i].getUtility() * inertia > 1.0f) { utilities.Add(1.0f); }
+                else { utilities.Add(this.actions[i].getUtility() * inertia); }
+                
+            } else
+            {
+                utilities.Add(this.actions[i].getUtility());
+            }
+            
         }
 
         // Si hay dos utilidades máximas iguales, se queda con la primera que encuentre
@@ -153,7 +170,16 @@ public class UtilitySystemEngine : BehaviourEngine
             Console.WriteLine("[DEBUG] Utilities: ");
             foreach(UtilityAction a in this.actions)
             {
-                Console.WriteLine(a.utilityState.Name + " utility " + a.getUtility());
+                if(a == ActiveAction)
+                {
+                    Console.Write(a.utilityState.Name + " active action utility " + a.getUtility());
+                    if (a.getUtility() * inertia > 1.0f) { Console.WriteLine(" inertia 1.0f"); }
+                    else { Console.WriteLine(" inertia " + a.getUtility() * inertia); }
+                } else
+                {
+                    Console.WriteLine(a.utilityState.Name + " utility " + a.getUtility());
+                }
+                
             }
             Console.WriteLine("[DEBUG] FINISHED UTILITIES DEBUG");
             Console.WriteLine("--------------------------------");
