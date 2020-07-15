@@ -88,8 +88,4 @@ public class UtilityAction
         
     }
 
-    public void Reset()
-    {
-
-    }
 }

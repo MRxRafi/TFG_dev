@@ -34,7 +34,6 @@ public class WeightedSumFusion : Fusion
         for(int i = 0; i < factors.Count; i++)
         {
             float factor = factors[i].getValue();
-            //if (factor < 0) factor = 0; if (factor > 1) factor = 1;
 
             sum += factor * weights[i];
         }

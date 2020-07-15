@@ -235,8 +235,6 @@ public class Transition {
         if(BehaviourEngine.actualState == StateFrom || StateFrom.BehaviourEngine.actualState == StateFrom) {
             //Debug.Log("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
             //Console.WriteLine("Transition fired: " + StateFrom.Name + " -> " + StateTo.Name);
-            /* EXPERIMENTAL */
-            /* Some configurator parameters could be missing here between Exit and Entry */
             StateFrom.Exit(this.Name);
             if (this.type == TRANSITION_TYPE.SUPER_TRANSITION) StateFrom.InternalTransition(this.Name);
 

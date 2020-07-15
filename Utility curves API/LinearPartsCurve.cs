@@ -8,6 +8,11 @@ public class LinearPartsCurve : Curve
     #endregion
 
     #region constructors
+    /// <summary>
+    /// Creates a linear by parts function factor that modify the value of the factor provided.
+    /// </summary>
+    /// <param name="f">The <see cref="Factor"/> provided to get a new value from it.</param>
+    /// <param name="points">The bunch of <see cref="Point2D"/> provided to the curve.</param>
     public LinearPartsCurve(Factor f, List<Point2D> points) : base(f)
     {
         this.setPoints(points);
@@ -16,6 +21,9 @@ public class LinearPartsCurve : Curve
 
     #region methods
 
+    /// <summary>
+    /// Sets a new bunch of <see cref="Point2D"/> to the curve.
+    /// </summary>
     public void setPoints(List<Point2D> points)
     {
         this.points = points;

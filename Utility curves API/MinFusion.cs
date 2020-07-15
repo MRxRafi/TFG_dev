@@ -5,6 +5,10 @@ using System.Linq;
 public class MinFusion : Fusion
 {
     #region constructors
+    /// <summary>
+    /// Creates a fusion factor that chooses the lowest factor value.
+    /// </summary>
+    /// <param name="factors">The <see cref="Factor"/> list provided to get the lowest value</param>
     public MinFusion(List<Factor> factors) : base(factors) { }
     #endregion
 

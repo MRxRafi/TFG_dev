@@ -11,7 +11,7 @@ public class UtilitySystemEngine : BehaviourEngine
     public List<UtilityAction> actions;
 
     private float inertia;
-    private bool DEBUG = true;
+    private bool DEBUG = false;
     #endregion
 
     #region constructors
@@ -85,11 +85,11 @@ public class UtilitySystemEngine : BehaviourEngine
                 {
                     ExitTransition(this.actions[maxIndex]);
                 }
-                ActiveAction.Update(); //En caso de necesitarse
+                ActiveAction.Update(); 
             } else if(Active && ActiveAction == null) {
                 int maxIndex = getMaxUtilityIndex();
                 ExitTransition(this.actions[maxIndex]);
-                ActiveAction.Update(); //En caso de necesitarse
+                ActiveAction.Update(); 
             }
         }
         
@@ -98,12 +98,6 @@ public class UtilitySystemEngine : BehaviourEngine
 
     public override void Reset()
     {
-        /*
-        foreach (UtilityAction action in actions)
-        {
-            action.Reset();
-        }
-        */
         this.ActiveAction = null;
     }
 
@@ -116,7 +110,7 @@ public class UtilitySystemEngine : BehaviourEngine
         {
             if(this.actions[i] == ActiveAction)
             {
-                // INERCIA + 30% peso
+                // INERCIA
                 if (this.actions[i].getUtility() * inertia > 1.0f) { utilities.Add(1.0f); }
                 else { utilities.Add(this.actions[i].getUtility() * inertia); }
                 
@@ -134,8 +128,9 @@ public class UtilitySystemEngine : BehaviourEngine
     #endregion
 
     #region transitions
-
-    // Exits from the actual utilityAction to go to another one
+    /// <summary>
+    /// Exits from the actual utilityAction to go to another one
+    /// </summary>
     public void ExitTransition(UtilityAction action)
     {
         string last = this.actualState.Name;
@@ -159,6 +154,8 @@ public class UtilitySystemEngine : BehaviourEngine
         }
 
         this.ActiveAction = action;
+
+        //DEBUGGING
         if (DEBUG)
         {
             //EXIT TRANSITION
@@ -191,11 +188,11 @@ public class UtilitySystemEngine : BehaviourEngine
     #region create actions
 
     /// <summary>
-    /// Creates a new <see cref="UtilityAction"/> in the utility curves engine
+    /// Creates a new basic <see cref="UtilityAction"/> in the utility curves engine
     /// </summary>
     /// <param name="name">The name of the utility action</param>
     /// <param name="action">The action the utility action will execute</param>
-    /// <returns></returns>
+    /// <param name="factor">The factor that will have the Utility Action</param>
     public UtilityAction CreateUtilityAction(string name, Action action, Factor factor)
     {
         if (!states.ContainsKey(name))
@@ -212,7 +209,15 @@ public class UtilitySystemEngine : BehaviourEngine
         }
     }
 
-    //Crea una UtilityAction que sirve para salir de la máquina al nodo hoja contenedor del UtilitySystem
+    /// <summary>
+    /// Creates a new specific <see cref="UtilityAction"/> in the utility curves engine that exits to the
+    /// <see cref="LeafNode"/> that contains the <see cref="UtilitySystemEngine"/> with the ReturnValues
+    /// provided in the constructor.
+    /// </summary>
+    /// <param name="name">The name of the utility action</param>
+    /// <param name="factor">The factor that will have the Utility Action</param>
+    /// <param name="valueReturned">The <see cref="ReturnValues"/> returned to the <see cref="LeafNode"/>.</param>
+    /// <param name="behaviourTreeEngine">The <see cref="BehaviourTreeEngine"/> that contains the <see cref="UtilitySystemEngine"/>.</param>
     public UtilityAction CreateUtilityAction(string name, Factor factor, ReturnValues valueReturned, BehaviourTreeEngine behaviourTreeEngine)
     {
         if (!states.ContainsKey(name))
@@ -229,7 +234,17 @@ public class UtilitySystemEngine : BehaviourEngine
         }
     }
 
-    //Crea una UtilityAction que sirve para salir de la máquina al nodo hoja contenedor del UtilitySystem, con un método a ejecutar asociado
+    /// <summary>
+    /// Creates a new specific <see cref="UtilityAction"/> in the utility curves engine that exits to the
+    /// <see cref="LeafNode"/> that contains the <see cref="UtilitySystemEngine"/> when the function valueReturned
+    /// returns something different than "Running".
+    /// </summary>
+    /// <param name="name">The name of the utility action</param>
+    /// <param name="factor">The factor that will have the Utility Action</param>
+    /// <param name="ac">The action that the <see cref="UtilityAction"/> will execute.</param>
+    /// <param name="valueReturned">The <see cref="ReturnValues"/> returned to the <see cref="LeafNode"/>. It's used to wait for a 
+    /// "Succeed" or "Failed".</param>
+    /// <param name="behaviourTreeEngine">The <see cref="BehaviourTreeEngine"/> that contains the <see cref="UtilitySystemEngine"/>.</param>
     public UtilityAction CreateUtilityAction(string name, Factor factor, Action ac, Func<ReturnValues> valueReturned, BehaviourTreeEngine behaviourTreeEngine)
     {
         if (!states.ContainsKey(name))
@@ -274,7 +289,7 @@ public class UtilitySystemEngine : BehaviourEngine
     }
 
     /// <summary>
-    /// Adds a type of <see cref="UtilityAction"/> with a sub-behaviour engine in it and its transition to the entry state
+    /// Adds a type of <see cref="UtilityAction"/> with a sub-behaviour engine in it and its transition to the specified state
     /// </summary>
     /// <param name="actionName">The name of the action</param>
     /// <param name="factor">The factor that gives the utility value to the action</param>
