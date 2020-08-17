@@ -1,14 +1,14 @@
 # API COMPORTAMIENTO INTELIGENCIA ARTIFICIAL
 
-Por el momento, la API incluye FSM y Behaviour trees.
+La API incluye FSM, Behaviour Trees y Utility Curves.
 
-Ambas técnicas se pueden mezclar sin problema.
+Todas las técnicas se pueden mezclar sin problema.
 
 **Objetivos**
 
 ~~1. Eliminar dependencia Stateless~~
 
-2. Incorporar Utility Curves (en proceso)
+~~2. Incorporar Utility Curves~~
 
 **Restricciones**
 
